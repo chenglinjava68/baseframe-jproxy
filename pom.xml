@@ -1,0 +1,115 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.hty.baseframe.jproxy</groupId>
+  <artifactId>baseframe-jproxy</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>baseframe-jproxy</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*</include>
+				</includes>
+			</resource>
+		</resources>
+
+	</build>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+	  <artifactId>commons-logging</artifactId>
+	  <version>1.1.1</version>
+    </dependency>
+    
+    <dependency>
+	    <groupId>org.apache.commons</groupId>
+	    <artifactId>commons-pool2</artifactId>
+	    <version>2.4.2</version>
+	</dependency>
+	
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+	  <artifactId>commons-beanutils</artifactId>
+	  <version>1.6.1</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>log4j</groupId>
+	  <artifactId>log4j</artifactId>
+	  <version>1.2.15</version>
+    </dependency>
+    
+	<!-- https://mvnrepository.com/artifact/com.dyuproject.protostuff/protostuff-core -->
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-core</artifactId>
+	    <version>1.1.2</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-api</artifactId>
+	    <version>1.1.2</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-codegen</artifactId>
+	    <version>1.0.9</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-collectionschema</artifactId>
+	    <version>1.1.2</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-compiler</artifactId>
+	    <version>1.0.9</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-parser</artifactId>
+	    <version>1.0.9</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-runtime</artifactId>
+	    <version>1.1.2</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-runtime-md</artifactId>
+	    <version>1.1.2</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.dyuproject.protostuff</groupId>
+	    <artifactId>protostuff-runtime-registry</artifactId>
+	    <version>1.1.2</version>
+	</dependency>
+	
+	
+	<dependency>
+		<groupId>com.hty.baseframe.common</groupId>
+		<artifactId>baseframe-common</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	
+  </dependencies>
+</project>

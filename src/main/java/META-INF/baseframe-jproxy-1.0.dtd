@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   baseframe:jproxy configuration DTD.
+   Use the following DOCTYPE
+
+   <!DOCTYPE baseframe:jproxy PUBLIC
+    "-//baseframe:jproxy//DTD baseframe:jproxy Configuration 1.0//EN"
+    "http://localhost/baseframe-jproxy-1.0.dtd">
+-->
+
+<!ELEMENT baseframe:jproxy (properties|registry|service:remote|service:local)*>
+
+<!ELEMENT properties (property)*>
+<!ELEMENT property (#PCDATA)>
+<!ATTLIST property
+    name CDATA #REQUIRED
+    value CDATA #REQUIRED
+>
+
+<!ELEMENT registry (center)*>
+<!ELEMENT center (#PCDATA)>
+<!ATTLIST center
+    port CDATA #REQUIRED
+    host CDATA #REQUIRED
+    id CDATA #REQUIRED
+>
+
+
+<!ELEMENT service:remote (rservice)*>
+<!ELEMENT rservice (conditions)*>
+<!ATTLIST rservice
+    class CDATA #REQUIRED
+    token CDATA #IMPLIED
+    poolsize CDATA #REQUIRED
+    version CDATA #IMPLIED
+    host CDATA #IMPLIED
+    port CDATA #IMPLIED
+    center CDATA #IMPLIED
+>
+
+
+<!ELEMENT conditions (condition)*>
+<!ELEMENT condition (#PCDATA)>
+<!ATTLIST condition
+    name CDATA #REQUIRED
+    value CDATA #REQUIRED
+>
+
+
+<!ELEMENT service:local (lservice)*>
+<!ELEMENT lservice (conditions|whitelist)*>
+<!ATTLIST lservice
+    class CDATA #REQUIRED
+    token CDATA #IMPLIED
+    version CDATA #IMPLIED
+    center CDATA #IMPLIED
+>
+
+<!ELEMENT whitelist (host)*>
+<!ELEMENT host (#PCDATA)>
