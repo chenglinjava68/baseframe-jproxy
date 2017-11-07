@@ -1,15 +1,16 @@
 package test;
 
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import test.beans.TestUser;
-import test.service.TestService;
-
 import com.hty.baseframe.jproxy.JProxy;
 import com.hty.baseframe.jproxy.client.ClientSocketManager;
 import com.hty.baseframe.jproxy.common.ServiceFactory;
+import test.beans.TestUser;
+import test.service.TestService;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Test2 {
 	
@@ -18,7 +19,7 @@ public class Test2 {
 		JProxy jp = new JProxy();
 		jp.start("jproxy.xml");
 		new Timer().scheduleAtFixedRate(new PrintTask(), 0L, 5000L);
-		for(int i = 0; i < 7; i++) {
+		for(int i = 0; i < 1; i++) {
 			Thread t1 = new Thread(new Task());
 			t1.setName("Mother-Fucker-" + i);
 			t1.start();
@@ -45,9 +46,12 @@ public class Test2 {
 
 		@Override
 		public void run() {
-			TestService ts = ServiceFactory.getProxyInstance(TestService.class, "1.0");
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("dbNum", "13");
+			TestService ts = ServiceFactory.getProxyInstance(TestService.class, "1.0", map);
+
 			TestUser tu = new TestUser(100, "zhangsan");
-			for(int i = 0; i < 500 ;i++) {
+			for(int i = 0; i < 1 ;i++) {
 				String ret;
 				try {
 					long a = System.currentTimeMillis();

@@ -19,38 +19,38 @@
 	远程服务也可以在不同的注册中心获取服务
 	-->
 	<registry>
-		<center id="localregistry" host="192.168.0.101" port="8989"></center>
+		<center id="localregistry" host="127.0.0.1" port="8888"></center>
 	</registry>
 	
 	<service:remote>
 		<rservice class="test.service.TestService"
-				 token="123123" poolsize="10" version="1.0" host="localhost" port="9999">
+				 token="123123" poolsize="10" version="1.0" center="localregistry">
 			<!-- 条件匹配参数，用于精确匹配服务。
 			说明：有些服务接口相同的情况下，不同的机器保存不同的数据，需要获取指定机器的代理服务。
 			远程服务将匹配参数暴露给注册中心，客户端请求携带相同的匹配参数就可以动态获取服务。
 			 -->
 			<conditions>
-				<condition name="dbNum" value="12"/>
+
 			</conditions>
 		 </rservice>
 	</service:remote>
 	
-	<service:local>
+	<!--<service:local>
 		<lservice class="test.service.TestService" token="123123" version="1.0" center="localregistry">
-			<!-- 白名单，只有白名单上匹配的IP地址才能调用 -->
+			&lt;!&ndash; 白名单，只有白名单上匹配的IP地址才能调用 &ndash;&gt;
 			<whitelist>
 				<host>192.168.*.*</host>
 				<host>127.0.0.*</host>
 				<host>244.8.56.133</host>
 			</whitelist>
-			<!-- 条件匹配参数，用于精确匹配服务。
+			&lt;!&ndash; 条件匹配参数，用于精确匹配服务。
 			说明：有些服务接口相同的情况下，不同的机器保存不同的数据，需要获取指定机器的代理服务。
 			远程服务将匹配参数暴露给注册中心，客户端请求携带相同的匹配参数就可以动态获取服务。
-			 -->
+			 &ndash;&gt;
 			<conditions>
 				<condition name="dbNum" value="12"/>
 			</conditions>
 		</lservice>
-	</service:local>
+	</service:local>-->
 	
 </baseframe:jproxy>

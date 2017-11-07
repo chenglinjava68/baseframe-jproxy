@@ -1,14 +1,13 @@
 package com.hty.baseframe.jproxy.server;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-
+import com.hty.baseframe.jproxy.common.ServiceFactory;
+import com.hty.baseframe.jproxy.common.SysProprties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.hty.baseframe.jproxy.common.ServiceFactory;
-import com.hty.baseframe.jproxy.common.SysProprties;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * 服务提供者服务端，在指定端口接收消费者的socket连接。
@@ -41,9 +40,13 @@ public final class ServiceServer implements Runnable {
 	}
 	
 	public void run() {
-		if(ServiceFactory.getLocalServiceCount() == 0) {
-			logger.info("JProxy Server is not start because no local service is configured.");
-			return;
+
+		while(ServiceFactory.getLocalServiceCount() == 0) {
+			try {
+				Thread.currentThread().sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		try {
 			ss = new ServerSocket(listen_port);

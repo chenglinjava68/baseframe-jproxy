@@ -1,12 +1,5 @@
 package com.hty.baseframe.jproxy.common;
 
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.hty.baseframe.jproxy.bean.LocalService;
 import com.hty.baseframe.jproxy.bean.RemoteService;
 import com.hty.baseframe.jproxy.client.ClientSocketManager;
@@ -14,6 +7,12 @@ import com.hty.baseframe.jproxy.client.ServiceInvocationHandler;
 import com.hty.baseframe.jproxy.exception.IllegalConfigurationException;
 import com.hty.baseframe.jproxy.exception.NoSuchServiceException;
 import com.hty.baseframe.jproxy.registry.ServiceRegistryServer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 /**
  * 服务工厂，保存本地和远程服务的配置信息，产生代理服务类等
  * @author Tisnyi
@@ -30,7 +29,8 @@ public class ServiceFactory {
 	//					<接口类, <版本, 代理实例类>>
 	private static Map<RemoteService, Object> proxyInstances = 
 			new HashMap<RemoteService, Object>();
-	
+
+
 	private static BeanProvider beanProvider;
 	
 	/**
@@ -108,15 +108,17 @@ public class ServiceFactory {
 		ClientSocketManager.getInstance().initSocketList(remoteService);
 		verMap.put(remoteService.getVersion(), remoteService);
 	}
+
 	/**
 	 * 获取远程服务
-	 * @param id
+	 * @param type 接口类
+	 * @param version 版本
 	 * @return
 	 */
 	public static RemoteService getRemoteService(Class<?> type, String version) {
 		Map<String, RemoteService> verMap = remote_services.get(type);
 		if(null == verMap || null == verMap.get(version)) {
-			throw new NoSuchServiceException("No RemoteService of type " + type.getName());
+			throw new NoSuchServiceException("No RemoteService of type " + type.getName() + " with version ["+ version +"]");
 		}
 		return verMap.get(version);
 	}
@@ -127,7 +129,16 @@ public class ServiceFactory {
 	 * @return
 	 */
 	public synchronized static <T> T getProxyInstance(Class<T> interfaceClass) {
-		return getProxyInstance(interfaceClass, null);
+		return getProxyInstance(interfaceClass, null, null);
+	}
+	/**
+	 * 获取远程服务代理实例（任何版本）
+	 * @param interfaceClass 代理接口类
+	 * @return
+	 */
+	public synchronized static <T> T getProxyInstance(Class<T> interfaceClass,
+										  Map<String, String> conditions) {
+		return getProxyInstance(interfaceClass, null, conditions);
 	}
 	/**
 	 * 获取远程服务代理实例（指定版本）
@@ -136,13 +147,14 @@ public class ServiceFactory {
 	 * @return 代理接口对象
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized static <T> T getProxyInstance(Class<T> interfaceClass, String version) {
+	public synchronized static <T> T getProxyInstance(Class<T> interfaceClass, String version,
+						Map<String, String> conditions) {
 		Object proxy;
 		RemoteService rs = getRemoteService(interfaceClass, version);
 		proxy = proxyInstances.get(rs);
 		if(null == proxy) {
-			proxy = Proxy.newProxyInstance(interfaceClass.getClassLoader(), 
-					new Class<?>[]{interfaceClass}, new ServiceInvocationHandler(rs));
+			proxy = Proxy.newProxyInstance(interfaceClass.getClassLoader(),
+					new Class<?>[]{interfaceClass}, new ServiceInvocationHandler(rs, conditions));
 			proxyInstances.put(rs, proxy);
 		}
 		return (T) proxy;

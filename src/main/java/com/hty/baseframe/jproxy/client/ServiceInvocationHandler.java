@@ -1,13 +1,15 @@
 package com.hty.baseframe.jproxy.client;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.net.Socket;
-
 import com.hty.baseframe.jproxy.bean.MethodEntity;
 import com.hty.baseframe.jproxy.bean.RemoteService;
 import com.hty.baseframe.jproxy.bean.ServiceResponse;
 import com.hty.baseframe.jproxy.exception.ServiceInvokationException;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.net.Socket;
+import java.util.Map;
+
 /**
  * 对调用的接口方法进行切面控制。
  * @author Hetianyi
@@ -16,9 +18,12 @@ import com.hty.baseframe.jproxy.exception.ServiceInvokationException;
 public class ServiceInvocationHandler implements InvocationHandler {
 	
 	private RemoteService rs;
+	/** 匹配条件，用于匹配相同Service下不同的生产者 */
+	private Map<String, String> conditions;
 	
-	public ServiceInvocationHandler(RemoteService rs) {
+	public ServiceInvocationHandler(RemoteService rs, Map<String, String> conditions) {
 		this.rs = rs;
+		this.conditions = conditions;
 	}
 
 	@Override
@@ -33,7 +38,7 @@ public class ServiceInvocationHandler implements InvocationHandler {
 		ClientSocketManager socketManager = ClientSocketManager.getInstance();
 		try {
 			//socket = SocketClientManager.getInstance().getPoolSocket(rs);
-			socket = socketManager.getServiceSocket(rs);
+			socket = socketManager.getServiceSocket(rs, conditions);
 			//System.out.println(Thread.currentThread().getName() + "释放"+ rs.getClazz() +"锁");
 			//System.out.println(Thread.currentThread().getName() + " 得到了socket");
 			ServiceResponse resp = null;

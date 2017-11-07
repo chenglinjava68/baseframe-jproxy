@@ -31,13 +31,13 @@ public class JProxyServiceRegistry implements ServiceRegistryClient {
 	
 	@Override
 	public boolean register(LocalService ls, ServiceProvider provider) {
-		ServiceRegistryServer regServer = ServiceFactory.getProxyInstance(ServiceRegistryServer.class, ls.getCenterId());
+		ServiceRegistryServer regServer = ServiceFactory.getProxyInstance(ServiceRegistryServer.class, ls.getCenterId(), null);
 		return regServer.expose(provider);
 	}
 
 	@Override
 	public CandidateProvider getAvailableService(RemoteService rs, ServiceConsumer consumer) {
-		ServiceRegistryServer regServer = ServiceFactory.getProxyInstance(ServiceRegistryServer.class, rs.getCenterId());
+		ServiceRegistryServer regServer = ServiceFactory.getProxyInstance(ServiceRegistryServer.class, rs.getCenterId(), null);
 		CandidateProvider provider = regServer.find(consumer);
 		return provider;
 	}

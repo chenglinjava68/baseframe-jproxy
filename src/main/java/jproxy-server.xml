@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jproxy>
+<!DOCTYPE baseframe:jproxy PUBLIC
+		"-//baseframe:jproxy//DTD baseframe:jproxy Configuration 1.0//EN"
+		"http://localhost/baseframe-jproxy-1.0.dtd">
+<baseframe:jproxy>
 	<properties>
 		<!-- 本地服务端口 -->
-		<property name="local_service_port" value="8888"/>
+		<property name="local_service_port" value="9999"/>
 		<!-- 服务端socket最大连接数-->
 		<property name="max_connection" value="20"/>
 		<!-- 服务类获取工具，该类由服务端实现 BeanProvider接口-->
@@ -15,16 +18,12 @@
 	远程服务也可以在不同的注册中心获取服务
 	-->
 	<registry>
-		<center id="localregistry" host="192.168.0.101" port="8989"></center>
+		<center id="localregistry" host="127.0.0.1" port="8888"></center>
 	</registry>
 	
 	
-	<service:remote>
-		
-	</service:remote>
-	
 	<service:local>
-		<service class="test.service.TestService" token="123123" version="1.0" center="localregistry">
+		<lservice class="test.service.TestService" token="123123" version="1.0" center="localregistry">
 			<!-- 白名单，只有白名单上匹配的IP地址才能调用 -->
 			<whitelist>
 				<host>192.168.*.*</host>
@@ -38,7 +37,7 @@
 			<conditions>
 				<condition name="dbNum" value="12"/>
 			</conditions>
-		</service>
+		</lservice>
 	</service:local>
 	
-</jproxy>
+</baseframe:jproxy>

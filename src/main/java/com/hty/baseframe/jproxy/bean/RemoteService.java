@@ -1,6 +1,7 @@
 package com.hty.baseframe.jproxy.bean;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -94,5 +95,22 @@ public class RemoteService {
 
 	public String getCenterId() {
 		return centerId;
+	}
+
+	/**
+	 * 克隆此RemoteService的一个副本用于动态获取代理服务
+	 * @param conditions 条件
+	 * @return
+	 */
+	public RemoteService clone(Map<String, String> conditions) {
+		RemoteService rs = new RemoteService(this.clazz, this.host, String.valueOf(this.port), this.token,
+				this.poolsize, this.version, this.centerId);
+		if(null != conditions && !conditions.isEmpty()) {
+			for(Iterator<String> it = conditions.keySet().iterator(); it.hasNext();) {
+				String key = it.next();
+				rs.addCondition(key, conditions.get(key));
+			}
+		}
+		return rs;
 	}
 } 
