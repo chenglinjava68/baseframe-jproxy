@@ -41,9 +41,9 @@ public class ServiceRegistryManager extends TimerTask {
 						try {
 							regCenterClient.register(ls, provider);
 							//regsuccess.add(ls.hashCode());
-							logger.info("register LocalService successfully: " + ls);
+							logger.debug("register LocalService successfully: " + ls);
 						} catch (Exception e) {
-							logger.info("register LocalService failed: " + ls);
+							logger.error("register LocalService failed: " + ls);
 							e.printStackTrace();
 							continue;
 						}
