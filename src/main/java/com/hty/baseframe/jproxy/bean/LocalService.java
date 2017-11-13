@@ -1,5 +1,6 @@
 package com.hty.baseframe.jproxy.bean;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,7 +12,9 @@ import com.hty.baseframe.common.util.StringUtil;
  * @author Tisnyi
  * @version 1.0
  */
-public class LocalService {
+public class LocalService implements Serializable {
+
+	private static final long serialVersionUID = -5055420941173439886L;
 	/** 接口调用token */
 	private final String token;
 	/** 本地接口类 */

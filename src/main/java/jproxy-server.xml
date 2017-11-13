@@ -18,12 +18,12 @@
 	远程服务也可以在不同的注册中心获取服务
 	-->
 	<registry>
-		<center id="localregistry" host="127.0.0.1" port="8888"></center>
+		<center id="localregistry" host="127.0.0.1" port="8989"></center>
 	</registry>
 	
 	
 	<service:local>
-		<lservice class="test.service.TestService" token="123123" version="1.0" center="localregistry">
+		<lservice class="test.service.TestService" token="123123" center="localregistry">
 			<!-- 白名单，只有白名单上匹配的IP地址才能调用 -->
 			<whitelist>
 				<host>192.168.*.*</host>

@@ -16,5 +16,5 @@ public interface BeanProvider {
 	 * @param version 版本
 	 * @return T
 	 */
-	public Object getBean(Class<?> type, String version);
+	public Object getBean(Class<?> type);
 }

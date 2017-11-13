@@ -1,21 +1,20 @@
 package com.hty.baseframe.jproxy.registry.loader;
 
-import java.io.Serializable;
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.hty.baseframe.common.util.StringUtil;
 import com.hty.baseframe.jproxy.bean.LocalService;
 import com.hty.baseframe.jproxy.common.SysProprties;
-import com.hty.baseframe.jproxy.server.ServerSocketManager;
 import com.hty.baseframe.jproxy.util.NetWorkInterfaceUtil;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 /**
  * 服务提供者Bean，在提供者启动时向注册中心定时注册，暴露服务的载体
  * @author Tisnyi
  */
 public class ServiceProvider implements Serializable {
+
 	private static final long serialVersionUID = 2305179703813320720L;
 	/** 服务接口类 */
 	private String clazz;
@@ -25,8 +24,6 @@ public class ServiceProvider implements Serializable {
 	private Set<String> whitelist;
 	/** token */
 	private String token;
-	/** 服务提供版本 */
-	private String version;
 	/** 服务端口 */
 	private int port;
 	/** 此参数由注册中心设置 */
@@ -44,7 +41,6 @@ public class ServiceProvider implements Serializable {
 		this.port = Integer.valueOf(SysProprties.getProperty("local_service_port"));
 		this.whitelist = ls.getClients();
 		this.token = null == ls.getToken() ? null : StringUtil.trim(ls.getToken());
-		this.version = null == ls.getVersion() ? null : StringUtil.trim(ls.getVersion());
 		this.conditions = ls.getConditions();
 		this.addresses = NetWorkInterfaceUtil.getLocalHostAddress();
 	}
@@ -52,14 +48,13 @@ public class ServiceProvider implements Serializable {
 	/**
 	 * 将该对象克隆为CandidateProvider返回给消费者
 	 */
-	public CandidateProvider clone() {
+	public CandidateProvider clone(String lookBackAddress) {
 		CandidateProvider provider = new CandidateProvider();
 		provider.setAddresses(this.addresses);;
 		provider.setClazz(this.clazz);
 		provider.setProviderLookBackAddress(this.providerLookBackAddress);
-		provider.setVersion(this.version);
 		provider.setPort(this.port);
-		provider.setConsumerLookBackAddress(((InetSocketAddress) ServerSocketManager.getCurrentSocket().getRemoteSocketAddress()).getAddress().getHostAddress());
+		provider.setConsumerLookBackAddress(lookBackAddress);
 		return provider;
 	}
 
@@ -69,14 +64,14 @@ public class ServiceProvider implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "{class:'"+ clazz +"', version:'"+ version +"', port:'"+ port +"', addresses: '"+ addresses +"', providerLookBackAddress: '"+ providerLookBackAddress +"'}";
+		return "{class:'"+ clazz +"', port:'"+ port +"', addresses: '"+ addresses +"', providerLookBackAddress: '"+ providerLookBackAddress +"'}";
 	}
 	/**
 	 * 获取该提供者的唯一标识
 	 * @return
 	 */
 	public String getUUID() {
-		return this.providerLookBackAddress + ":" + this.port + ":" + this.clazz + ":" + this.version;
+		return this.providerLookBackAddress + ":" + this.port + ":" + this.clazz;
 	}
 
 
@@ -110,14 +105,6 @@ public class ServiceProvider implements Serializable {
 
 	public void setToken(String token) {
 		this.token = token;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
 	}
 
 	public int getPort() {

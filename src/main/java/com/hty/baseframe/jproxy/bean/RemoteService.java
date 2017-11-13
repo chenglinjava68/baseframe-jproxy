@@ -12,8 +12,6 @@ import java.util.Map;
 public class RemoteService {
 	/** 服务接口类 */
 	private final Class<?> clazz;
-	/** 接口版本 */
-	private final String version;
 	/** 远程服务地址 */
 	private final String host;
 	/** 远程服务端口*/
@@ -27,21 +25,23 @@ public class RemoteService {
 	 * 否则直接使用RemoteService的host:port直连 
 	 * */
 	private final String centerId;
-
+	/**
+	 * 匹配条件，如果获取代理类时没有条件，使用配置文件中的匹配条件，
+	 * 如果获取代理类时存在条件，则使用给定的条件。
+	 */
 	private final Map<String, String> conditions = new HashMap<String, String>();
 	
 	/**
-	 * 默认构造方法
-	 * @param id 远程服务的本地标识ID，用于标识远程服务
-	 * @param serviceId 远程服务ID，用于标识对应的远程服务
+	 * 默认构造方法，如果给出centerId，则host和port参数可为空，否则需要给出host和port参数
 	 * @param clazz 服务接口类
 	 * @param host 远程服务主机地址
-	 * @param port 远程服务主机端口
+	 * @param _port 远程服务主机端口（字符串）
 	 * @param token 服务token
 	 * @param poolsize 服务socket池大小
+	 * @param centerId 注册中心
 	 */
 	public RemoteService(Class<?> clazz, String host, String _port, String token, 
-			int poolsize, String version, String centerId) {
+			int poolsize, String centerId) {
 		this.clazz = clazz;
 		this.host = host;
 		try {
@@ -51,7 +51,6 @@ public class RemoteService {
 		}
 		this.token = token;
 		this.poolsize = poolsize;
-		this.version = version;
 		this.centerId = centerId;
 	}
 	
@@ -89,10 +88,6 @@ public class RemoteService {
 				+"', poolsize:'"+ poolsize +"', centerId:'"+ centerId +"'}";
 	}
 
-	public String getVersion() {
-		return version;
-	}
-
 	public String getCenterId() {
 		return centerId;
 	}
@@ -104,7 +99,7 @@ public class RemoteService {
 	 */
 	public RemoteService clone(Map<String, String> conditions) {
 		RemoteService rs = new RemoteService(this.clazz, this.host, String.valueOf(this.port), this.token,
-				this.poolsize, this.version, this.centerId);
+				this.poolsize, this.centerId);
 		if(null != conditions && !conditions.isEmpty()) {
 			for(Iterator<String> it = conditions.keySet().iterator(); it.hasNext();) {
 				String key = it.next();

@@ -1,9 +1,14 @@
 package com.hty.baseframe.jproxy.bean;
+
+import java.io.Serializable;
+
 /**
  * 注册中心Bean
  * @author Tisnyi
  */
-public class RegistryCenter {
+public class RegistryCenter implements Serializable {
+
+	private static final long serialVersionUID = -4304059914999554370L;
 	/** 注册中心ID */
 	private final String id;
 	/** 注册中心地址 */

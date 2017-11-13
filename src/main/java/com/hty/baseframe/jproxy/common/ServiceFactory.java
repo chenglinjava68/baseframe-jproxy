@@ -1,17 +1,19 @@
 package com.hty.baseframe.jproxy.common;
 
+import com.hty.baseframe.common.util.StringUtil;
 import com.hty.baseframe.jproxy.bean.LocalService;
 import com.hty.baseframe.jproxy.bean.RemoteService;
-import com.hty.baseframe.jproxy.client.ClientSocketManager;
 import com.hty.baseframe.jproxy.client.ServiceInvocationHandler;
 import com.hty.baseframe.jproxy.exception.IllegalConfigurationException;
 import com.hty.baseframe.jproxy.exception.NoSuchServiceException;
-import com.hty.baseframe.jproxy.registry.ServiceRegistryServer;
+import com.hty.baseframe.jproxy.util.ConditionMatchUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 /**
  * 服务工厂，保存本地和远程服务的配置信息，产生代理服务类等
@@ -20,17 +22,17 @@ import java.util.Map;
 public class ServiceFactory {
 	
 	private static Log logger = LogFactory.getLog(ServiceFactory.class);
-	//						<接口类, <版本, LocalService>>
-	private static final Map<Class<?>, Map<String, LocalService>> local_services = 
-			new HashMap<Class<?>, Map<String, LocalService>>();
-	//						<接口类, <版本, LocalService>>
-	private static final Map<Class<?>, Map<String, RemoteService>> remote_services = 
-			new HashMap<Class<?>, Map<String, RemoteService>>();
-	//					<接口类, <版本, 代理实例类>>
-	private static Map<RemoteService, Object> proxyInstances = 
-			new HashMap<RemoteService, Object>();
 
+	//本地服务 <接口类, List<LocalService>>
+	private static final Map<Class<?>, List<LocalService>> local_services =
+			new HashMap<Class<?>, List<LocalService>>();
+	//远程服务 <接口类, List<RemoteService>>
+	private static final Map<Class<?>, List<RemoteService>> remote_services =
+			new HashMap<Class<?>, List<RemoteService>>();
+	//远程服务代理映射 <接口类, <版本, 代理实例类>>
+	private static Map<RemoteService, Object> proxyInstances = new HashMap<RemoteService, Object>();
 
+	/*Bean提供工具类*/
 	private static BeanProvider beanProvider;
 	
 	/**
@@ -38,50 +40,59 @@ public class ServiceFactory {
 	 * @param localService
 	 */
 	public static synchronized void addLocalService(LocalService localService) {
-		if(null == beanProvider) {
-			throw new IllegalConfigurationException("No BeanProvider specific, can not add LocalService.");
-		}
-		
+
 		if(null == localService) {
 			throw new IllegalConfigurationException("Can not add a null LocalService!");
 		}
 		if(!localService.getClazz().isInterface()) {
-			throw new IllegalConfigurationException("LocalService '"+ localService.getClazz().getName() +"' with version : '" + localService.getVersion() + "' is not an interface type.");
+			throw new IllegalConfigurationException("LocalService '"+ localService.getClazz().getName() +"' is not an interface.");
 		}
-		Map<String, LocalService> verMap = local_services.get(localService.getClazz());
-		if(null == verMap) {
-			verMap = new HashMap<String, LocalService>();
-			local_services.put(localService.getClazz(), verMap);
+		List<LocalService> list = local_services.get(localService.getClazz());
+		if(null == list) {
+			list = new ArrayList<LocalService>();
+			local_services.put(localService.getClazz(), list);
 		}
-		if(null != verMap.get(localService.getVersion())) {
-			throw new IllegalConfigurationException("LocalService '"+ localService.getClazz().getName() +"' with version : '" + localService.getVersion() + "' already exists.");
+		if(list.isEmpty()) {
+			logger.info("Add LocalService with condition: " + localService.getConditions());
+			list.add(localService);
 		}
-		logger.info("Adding LocalService: " + localService);
-		verMap.put(localService.getVersion(), localService);
+		else
+		for (int i = 0; i < list.size(); i++) {
+			LocalService ls = list.get(i);
+			int cmp = ConditionMatchUtil.mapCompare(ls.getConditions(), localService.getConditions());
+			if(cmp == 0 || cmp == 1) {
+				//已存在相同条件的LocalService,不再添加
+				logger.warn("LocalService is already exists with condition: " + localService.getConditions());
+				continue;
+			}
+			else if (cmp == 2) {
+				//新加入的LocalService条件包含当前LocalService，替换
+				logger.info("LocalService replaced with condition: " + localService.getConditions());
+				list.set(i, localService);
+			}
+			else {
+				logger.info("Add LocalService with condition: " + localService.getConditions());
+				list.add(localService);
+			}
+		}
 	}
 	/**
 	 * 获取一个本地服务
 	 * @param type 服务接口类
-	 * @param version 服务版本
+	 * @param conditions 服务版本
 	 * @return LocalService
 	 */
-	public static LocalService getLocalService(Class<?> type, String version) {
-		Map<String, LocalService> verMap = local_services.get(type);
-		if(null == verMap) {
-			throw new NoSuchServiceException("No LocalService of type " + type.getName() + " with version:"+ version);
+	public static LocalService getLocalService(Class<?> type, Map<String, String> conditions) {
+		List<LocalService> localServices = local_services.get(type);
+		if(null == localServices || localServices.isEmpty()) {
+			throw new NoSuchServiceException("No LocalService found of type " + type.getName());
 		}
-		//特殊处理，ServiceRegistryServer忽略版本
-		if(type == ServiceRegistryServer.class) {
-			LocalService ls = verMap.get(null);
-			if(null == ls) {
-				throw new NoSuchServiceException("No LocalService of type " + type.getName() + " with version:"+ version);
+		for (LocalService ls : localServices) {
+			if(ConditionMatchUtil.isMatch(conditions, ls.getConditions())) {
+				return ls;
 			}
-			return ls;
 		}
-		if(null == verMap.get(version)) {
-			throw new NoSuchServiceException("No LocalService of type " + type.getName() + " with version:"+ version);
-		}
-		return verMap.get(version);
+		throw new NoSuchServiceException("No LocalService of type " + type.getName());
 	}
 	
 	
@@ -94,37 +105,65 @@ public class ServiceFactory {
 			throw new IllegalConfigurationException("Can not add a null RemoteService!");
 		}
 		if(!remoteService.getClazz().isInterface()) {
-			throw new IllegalConfigurationException("RemoteService '"+ remoteService.getClazz().getName() +"' with version : '" + remoteService.getVersion() + "' is not an interface type.");
+			throw new IllegalConfigurationException("RemoteService '"+ remoteService.getClazz().getName() +"' is not an interface.");
 		}
-		Map<String, RemoteService> verMap = remote_services.get(remoteService.getClazz());
-		if(null == verMap) {
-			verMap = new HashMap<String, RemoteService>();
-			remote_services.put(remoteService.getClazz(), verMap);
+		List<RemoteService> list = remote_services.get(remoteService.getClazz());
+		if(null == list) {
+			list = new ArrayList<RemoteService>();
+			remote_services.put(remoteService.getClazz(), list);
 		}
-		if(null != verMap.get(remoteService.getVersion())) {
-			throw new IllegalConfigurationException("RemoteService '"+ remoteService.getClazz().getName() +"' with version : '" + remoteService.getVersion() + "' already exists.");
+		if(list.isEmpty()) {
+			logger.info("Add RemoteService with condition: " + remoteService.getConditions());
+			list.add(remoteService);
 		}
-		logger.info("Adding RemoteService: " + remoteService);
-		ClientSocketManager.getInstance().initSocketList(remoteService);
-		verMap.put(remoteService.getVersion(), remoteService);
+		else
+		for (int i = 0; i < list.size(); i++) {
+			RemoteService ls = list.get(i);
+			int cmp = ConditionMatchUtil.mapCompare(ls.getConditions(), remoteService.getConditions());
+			if(cmp == 0 || cmp == 1) {
+				//已存在相同条件的RemoteService,不再添加
+				logger.warn("RemoteService is already exists with condition: " + remoteService.getConditions());
+				continue;
+			}
+			else if (cmp == 2) {
+				//新加入的RemoteService条件包含当前RemoteService，替换
+				logger.info("RemoteService replaced with condition: " + remoteService.getConditions());
+				list.set(i, remoteService);
+			}
+			else {
+				logger.info("Add RemoteService with condition: " + remoteService.getConditions());
+				list.add(remoteService);
+			}
+		}
 	}
 
 	/**
 	 * 获取远程服务
 	 * @param type 接口类
-	 * @param version 版本
+	 * @param conditions 条件
 	 * @return
 	 */
-	public static RemoteService getRemoteService(Class<?> type, String version) {
-		Map<String, RemoteService> verMap = remote_services.get(type);
-		if(null == verMap || null == verMap.get(version)) {
-			throw new NoSuchServiceException("No RemoteService of type " + type.getName() + " with version ["+ version +"]");
+	public static RemoteService getRemoteService(Class<?> type, String registryCenterId,
+												 Map<String, String> conditions) {
+		List<RemoteService> remoteServices = remote_services.get(type);
+		if(null == remoteServices || remoteServices.isEmpty()) {
+			throw new NoSuchServiceException("No RemoteService found of type " + type.getName());
 		}
-		return verMap.get(version);
+		for (RemoteService ls : remoteServices) {
+			if(ConditionMatchUtil.isMatch(conditions, ls.getConditions())) {
+				if(!StringUtil.isEmpty(registryCenterId)) {
+					if(!StringUtil.equals(registryCenterId, ls.getCenterId())) {
+						continue;
+					}
+				}
+				return ls;
+			}
+		}
+		throw new NoSuchServiceException("No RemoteService of type " + type.getName());
 	}
 	
 	/**
-	 * 获取远程服务代理实例（任何版本）
+	 * 获取远程服务代理实例
 	 * @param interfaceClass 代理接口类
 	 * @return
 	 */
@@ -132,7 +171,7 @@ public class ServiceFactory {
 		return getProxyInstance(interfaceClass, null, null);
 	}
 	/**
-	 * 获取远程服务代理实例（任何版本）
+	 * 获取远程服务代理实例
 	 * @param interfaceClass 代理接口类
 	 * @return
 	 */
@@ -141,20 +180,20 @@ public class ServiceFactory {
 		return getProxyInstance(interfaceClass, null, conditions);
 	}
 	/**
-	 * 获取远程服务代理实例（指定版本）
+	 * 获取远程服务代理实例
 	 * @param interfaceClass 代理接口类
-	 * @param version 接口版本
+	 * @param registryCenterId 注册中心ID
 	 * @return 代理接口对象
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized static <T> T getProxyInstance(Class<T> interfaceClass, String version,
+	public synchronized static <T> T getProxyInstance(Class<T> interfaceClass, String registryCenterId,
 						Map<String, String> conditions) {
 		Object proxy;
-		RemoteService rs = getRemoteService(interfaceClass, version);
+		RemoteService rs = getRemoteService(interfaceClass, registryCenterId, conditions);
 		proxy = proxyInstances.get(rs);
 		if(null == proxy) {
 			proxy = Proxy.newProxyInstance(interfaceClass.getClassLoader(),
-					new Class<?>[]{interfaceClass}, new ServiceInvocationHandler(rs, conditions));
+					new Class<?>[]{interfaceClass}, new ServiceInvocationHandler(rs));
 			proxyInstances.put(rs, proxy);
 		}
 		return (T) proxy;
@@ -173,10 +212,10 @@ public class ServiceFactory {
 	public static void setBeanProvider(BeanProvider beanProvider) {
 		ServiceFactory.beanProvider = beanProvider;
 	}
-	public static Map<Class<?>, Map<String, LocalService>> getLocalServices() {
+	public static Map<Class<?>, List<LocalService>> getLocalServices() {
 		return local_services;
 	}
-	public static Map<Class<?>, Map<String, RemoteService>> getRemoteServices() {
+	public static Map<Class<?>, List<RemoteService>> getRemoteServices() {
 		return remote_services;
 	}
 }

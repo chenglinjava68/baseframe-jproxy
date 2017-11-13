@@ -6,6 +6,7 @@ import java.io.Serializable;
  * @author Tisnyi
  */
 public class MethodEntity implements Serializable {
+
 	private static final long serialVersionUID = 6071213128946294094L;
 	/**
 	 * 调用方法所在类的名称:class.getName() 

@@ -2,7 +2,6 @@ package test;
 
 
 import com.hty.baseframe.jproxy.JProxy;
-import com.hty.baseframe.jproxy.client.ClientSocketManager;
 import com.hty.baseframe.jproxy.common.ServiceFactory;
 import test.beans.TestUser;
 import test.service.TestService;
@@ -19,7 +18,7 @@ public class Test2 {
 		JProxy jp = new JProxy();
 		jp.start("jproxy.xml");
 		new Timer().scheduleAtFixedRate(new PrintTask(), 0L, 5000L);
-		for(int i = 0; i < 1; i++) {
+		for(int i = 0; i < 20; i++) {
 			Thread t1 = new Thread(new Task());
 			t1.setName("Mother-Fucker-" + i);
 			t1.start();
@@ -31,10 +30,8 @@ public class Test2 {
 		@Override
 		public void run() {
 			long end = System.currentTimeMillis();
-			System.out.println(count + "--" + (end-start)*1.0/1000 + "[ms/个]" + "--TestService的socket创建次数：" + ClientSocketManager.count);
-			if(count >= 7*500) {
-				System.exit(0);
-			}
+//			System.out.println(count + "--" + (end-start)*1.0/1000 + "[ms/个]" + "--TestService的socket创建次数：" + ClientSocketManager.count);
+
 		}
 	}
 	
@@ -47,11 +44,11 @@ public class Test2 {
 		@Override
 		public void run() {
 			Map<String, String> map = new HashMap<String, String>();
-			map.put("dbNum", "13");
-			TestService ts = ServiceFactory.getProxyInstance(TestService.class, "1.0", map);
+			map.put("dbNum", "12");
+			TestService ts = ServiceFactory.getProxyInstance(TestService.class);
 
 			TestUser tu = new TestUser(100, "zhangsan");
-			for(int i = 0; i < 1 ;i++) {
+			for(int i = 0; i < 1000 ;i++) {
 				String ret;
 				try {
 					long a = System.currentTimeMillis();

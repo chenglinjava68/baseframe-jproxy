@@ -19,12 +19,12 @@
 	远程服务也可以在不同的注册中心获取服务
 	-->
 	<registry>
-		<center id="localregistry" host="127.0.0.1" port="8888"></center>
+		<center id="localregistry" host="127.0.0.1" port="8989"></center>
 	</registry>
 	
 	<service:remote>
 		<rservice class="test.service.TestService"
-				 token="123123" poolsize="10" version="1.0" center="localregistry">
+				 token="123123" poolsize="10" center="localregistry">
 			<!-- 条件匹配参数，用于精确匹配服务。
 			说明：有些服务接口相同的情况下，不同的机器保存不同的数据，需要获取指定机器的代理服务。
 			远程服务将匹配参数暴露给注册中心，客户端请求携带相同的匹配参数就可以动态获取服务。

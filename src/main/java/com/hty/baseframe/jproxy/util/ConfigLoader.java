@@ -1,10 +1,5 @@
 package com.hty.baseframe.jproxy.util;
 
-import java.io.InputStream;
-import java.util.List;
-
-import org.w3c.dom.Document;
-
 import com.hty.baseframe.common.bean.DomElement;
 import com.hty.baseframe.common.util.StringUtil;
 import com.hty.baseframe.common.util.XmlParser;
@@ -16,6 +11,10 @@ import com.hty.baseframe.jproxy.common.RegistryFactory;
 import com.hty.baseframe.jproxy.common.ServiceFactory;
 import com.hty.baseframe.jproxy.common.SysProprties;
 import com.hty.baseframe.jproxy.exception.IllegalConfigurationException;
+import org.w3c.dom.Document;
+
+import java.io.InputStream;
+import java.util.List;
 /**
  * 配置加载工具类
  * @author Tisnyi
@@ -155,11 +154,7 @@ public class ConfigLoader {
 						String port = StringUtil.trim(pele.getAttribute("port"));
 						String poolsize = StringUtil.trim(pele.getAttribute("poolsize"));
 						String token = StringUtil.trim(pele.getAttribute("token"));
-						String version = StringUtil.trim(pele.getAttribute("version"));
 						String center = StringUtil.trim(pele.getAttribute("center"));
-						if(StringUtil.isEmpty(version)) {
-							version = null;
-						}
 						if(StringUtil.isEmpty(center)) {
 							center = null;
 						}
@@ -180,7 +175,7 @@ public class ConfigLoader {
 						}
 						Class<?> clazz = Class.forName(clazzName);
 						RemoteService rs = new RemoteService(clazz, host, port, 
-								token, Integer.valueOf(poolsize), version, center);
+								token, Integer.valueOf(poolsize), center);
 						
 						List<DomElement> heles = pele.getElements();
 						if(null != heles)

@@ -7,7 +7,7 @@ import com.hty.baseframe.jproxy.common.BeanProvider;
 public class TestBeanProvider implements BeanProvider {
 	
 	@Override
-	public Object getBean(Class<?> type, String version) {
+	public Object getBean(Class<?> type) {
 		return new TestServiceImpl();
 	}
 

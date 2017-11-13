@@ -1,15 +1,14 @@
 package com.hty.baseframe.jproxy.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.hty.baseframe.jproxy.bean.RegistryCenter;
 import com.hty.baseframe.jproxy.bean.RemoteService;
 import com.hty.baseframe.jproxy.exception.IllegalConfigurationException;
-import com.hty.baseframe.jproxy.registry.ServiceRegistryServer;
+import com.hty.baseframe.jproxy.registry.ServiceRegistryService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 注册中心工厂类
@@ -20,11 +19,13 @@ public class RegistryFactory {
 	private Log logger = LogFactory.getLog(RegistryFactory.class);
 	/** 单实例 */
 	private static RegistryFactory registryFactory;
-	
+	/** 注册中心 */
 	private static Map<String, RegistryCenter> centers = new HashMap<String, RegistryCenter>();
+
 	/** 构造方法私有化 */
 	private RegistryFactory() {
 	}
+
 	/**
 	 * 获取单实例的RegistryFactory
 	 * @return RegistryFactory
@@ -48,8 +49,8 @@ public class RegistryFactory {
 			logger.info("Adding RegistryCenter: " + center);
 			//没添加一个注册中心，自动添加一个特殊的RemoteService（注册服务）
 			//注册服务最多只给一个socket连接，且token，version，centerId均为空
-			RemoteService rs = new RemoteService(ServiceRegistryServer.class,
-					center.getHost(), String.valueOf(center.getPort()), null, 1, center.getId(), null);
+			RemoteService rs = new RemoteService(ServiceRegistryService.class,
+					center.getHost(), String.valueOf(center.getPort()), null, 1, center.getId());
 			ServiceFactory.addRemoteService(rs);
 			centers.put(center.getId(), center);
 		} else {

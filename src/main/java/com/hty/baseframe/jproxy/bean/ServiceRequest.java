@@ -10,10 +10,11 @@ import java.util.Map;
 public class ServiceRequest implements Serializable {
 
 	private static final long serialVersionUID = 3249474311510602119L;
+
+	/** 请求ID */
+	private String requestId;
 	/** 远程服务接口类 */
 	private Class<?> clazz;
-	/** 远程服务接口类版本 */
-	private String version;
 	/** 调用接口方法 */
 	private MethodEntity methodEntity;
 	/** 调用额外参数 */
@@ -37,15 +38,18 @@ public class ServiceRequest implements Serializable {
 	public Map<String, Object> getParameters() {
 		return parameters;
 	}
-	public String getVersion() {
-		return version;
-	}
-	public void setVersion(String version) {
-		this.version = version;
-	}
 	public Class<?> getClazz() {
 		return clazz;
 	}
+
+	public String getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
+	}
+
 	public void setClazz(Class<?> clazz) {
 		this.clazz = clazz;
 	}

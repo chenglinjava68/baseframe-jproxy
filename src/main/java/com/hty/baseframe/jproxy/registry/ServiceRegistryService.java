@@ -9,7 +9,7 @@ import com.hty.baseframe.jproxy.registry.loader.ServiceProvider;
  * 该服务的只能同时连接一个注册中心
  * @author Tisnyi
  */
-public interface ServiceRegistryServer {
+public interface ServiceRegistryService {
 	/**
 	 * 服务提供者暴露服务
 	 * @param provider

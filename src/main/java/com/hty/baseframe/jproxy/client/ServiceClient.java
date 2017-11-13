@@ -1,15 +1,5 @@
 package com.hty.baseframe.jproxy.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.NotSerializableException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.net.Socket;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.hty.baseframe.jproxy.bean.MethodEntity;
 import com.hty.baseframe.jproxy.bean.RemoteService;
 import com.hty.baseframe.jproxy.bean.ServiceRequest;
@@ -17,6 +7,11 @@ import com.hty.baseframe.jproxy.bean.ServiceResponse;
 import com.hty.baseframe.jproxy.common.Const;
 import com.hty.baseframe.jproxy.util.MethodUtil;
 import com.hty.baseframe.jproxy.util.SerializeUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.*;
+import java.net.Socket;
 /**
  * 本地调用远程接口的数据发送工具类。<br>
  * 发送请求到远程主机并返回远程处理结果。
@@ -42,7 +37,6 @@ public class ServiceClient {
 		ServiceRequest req = new ServiceRequest();
 		req.setMethodEntity(me);
 		req.setClazz(service.getClazz());
-		req.setVersion(service.getVersion());
 		req.addParameter("token", service.getToken());
 		byte[] bs = SerializeUtil.serialize(req);
 		String head = SerializeUtil.getHeadString(bs.length, Const.REQUEST_HEAD_SIZE);

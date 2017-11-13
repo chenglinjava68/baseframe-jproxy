@@ -4,7 +4,7 @@ import com.hty.baseframe.jproxy.bean.LocalService;
 import com.hty.baseframe.jproxy.bean.RemoteService;
 import com.hty.baseframe.jproxy.common.ServiceFactory;
 import com.hty.baseframe.jproxy.registry.ServiceRegistryClient;
-import com.hty.baseframe.jproxy.registry.ServiceRegistryServer;
+import com.hty.baseframe.jproxy.registry.ServiceRegistryService;
 import com.hty.baseframe.jproxy.registry.loader.CandidateProvider;
 import com.hty.baseframe.jproxy.registry.loader.ServiceConsumer;
 import com.hty.baseframe.jproxy.registry.loader.ServiceProvider;
@@ -31,13 +31,13 @@ public class JProxyServiceRegistry implements ServiceRegistryClient {
 	
 	@Override
 	public boolean register(LocalService ls, ServiceProvider provider) {
-		ServiceRegistryServer regServer = ServiceFactory.getProxyInstance(ServiceRegistryServer.class, ls.getCenterId(), null);
+		ServiceRegistryService regServer = ServiceFactory.getProxyInstance(ServiceRegistryService.class, ls.getCenterId(), null);
 		return regServer.expose(provider);
 	}
 
 	@Override
 	public CandidateProvider getAvailableService(RemoteService rs, ServiceConsumer consumer) {
-		ServiceRegistryServer regServer = ServiceFactory.getProxyInstance(ServiceRegistryServer.class, rs.getCenterId(), null);
+		ServiceRegistryService regServer = ServiceFactory.getProxyInstance(ServiceRegistryService.class, rs.getCenterId(), null);
 		CandidateProvider provider = regServer.find(consumer);
 		return provider;
 	}

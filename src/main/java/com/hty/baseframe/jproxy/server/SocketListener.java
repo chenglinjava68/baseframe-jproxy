@@ -1,6 +1,8 @@
 package com.hty.baseframe.jproxy.server;
 
 
+import org.apache.mina.core.session.IoSession;
+
 /**
  * SocketListener附加在每个ServerSocketManager线程里，监听客户端Socket连接状态，如果客户端Socket断开，
  * 服务端应该能立刻感知到这个状态，此时ServerSocketManager会通知绑定到自己的SocketListener客户socket已断开
@@ -13,10 +15,10 @@ public interface SocketListener {
 	 * 通知有新的socket连接传入
 	 * @param socket
 	 */
-	public void connect();
+	public void connect(IoSession session);
 	/**
 	 * 通知有客户端socket断开
 	 * @param socket
 	 */
-	public void disconnect();
+	public void disconnect(IoSession session);
 }

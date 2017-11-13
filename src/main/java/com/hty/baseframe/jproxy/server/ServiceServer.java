@@ -2,12 +2,11 @@ package com.hty.baseframe.jproxy.server;
 
 import com.hty.baseframe.jproxy.common.ServiceFactory;
 import com.hty.baseframe.jproxy.common.SysProprties;
+import com.hty.baseframe.jproxy.tunel.server.ServerTunnel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 /**
  * 服务提供者服务端，在指定端口接收消费者的socket连接。
@@ -23,9 +22,7 @@ public final class ServiceServer implements Runnable {
 	private int max_conn_count;
 	/** 客户端当前连接总数 */
 	private static int client_count = 0;
-	
-	
-	private ServerSocket ss;
+
 	
 	private SocketListener listener;
 	
@@ -48,30 +45,10 @@ public final class ServiceServer implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		try {
-			ss = new ServerSocket(listen_port);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		new ServerTunnel(listen_port, listener);
 		logger.info("Starting JProxy Server : [max_connection="+ max_conn_count +"]");
 		logger.info("JProxy Server is listening on port : [" + listen_port + "]");
-		while(true) {
-			try {
-				//限制客户端连接数
-				while(client_count > max_conn_count) {
-					try {
-					Thread.sleep(1000);
-					} catch (InterruptedException e) {}
-				}
-				Socket client = ss.accept();
-				ServerSocketManager manager = new ServerSocketManager(client, this, listener);
-				flagConnection(1);
-				Thread t = new Thread(manager);
-				t.start();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+
 	}
 	
 	synchronized void flagConnection(int flag) {

@@ -17,8 +17,9 @@ public class ServiceResponse implements Serializable {
 	public static final int PERMISSION_DENIE_IP = 20;//请求不允许:IP地址不允许调用
 	public static final int PERMISSION_DENIE_TOKEN = 21;//请求不允许：token验证失败 
 	public static final int INNER_ERROR = 30;//内部错误（业务逻辑错误）
-	
-	
+
+	/** 请求ID */
+	private String requestId;
 	/** 处理结果信号代码 */
 	private int code;
 	/** 处理结果 */
@@ -35,5 +36,13 @@ public class ServiceResponse implements Serializable {
 	}
 	public void setResult(Object result) {
 		this.result = result;
+	}
+
+	public String getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
 	}
 }
