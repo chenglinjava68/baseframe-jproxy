@@ -12,9 +12,12 @@ import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class ServerTunnelHandler extends IoHandlerAdapter {
@@ -30,12 +33,34 @@ public class ServerTunnelHandler extends IoHandlerAdapter {
 		this.listener = listener;
 	}
 
+	private static Map<Long, Long> sessionIdleTimes = new HashMap<Long, Long>();
+
+
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
+		sessionIdleTimes.put(session.getId(), 0L);
 		if(null != listener) {
 			listener.connect(session);
 		}
 		super.sessionCreated(session);
+	}
+
+	@Override
+	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
+		logger.info("session["+ session.getId() +"] idle.");
+		//当连接进入空闲，10s调用该方法一次，当持续空闲一段时间，服务端主动断开连接，
+		//bug：允许一段时间后
+		//NioSocketAcceptor线程会出现cpu飙高的现象
+		Long idleTimes = sessionIdleTimes.get(session.getId());
+		if(idleTimes == null) {
+			idleTimes = 0L;
+		}
+		idleTimes++;
+		if(idleTimes > 30) {
+			logger.warn("session closed by server: idle too long.");
+			session.close(true);
+		}
+		sessionIdleTimes.put(session.getId(), idleTimes);
 	}
 
 	public static IoSession getCurrentIoSession() {
@@ -45,11 +70,13 @@ public class ServerTunnelHandler extends IoHandlerAdapter {
 	@Override
 	public void messageSent(IoSession session, Object message) throws Exception {
 		logger.debug("Server send success.");
+		sessionIdleTimes.put(session.getId(), 0L);
 	}
 	
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
 		logger.debug("Server closed.");
+		sessionIdleTimes.remove(session.getId());
 		if(null != listener) {
 			listener.disconnect(session);
 		}

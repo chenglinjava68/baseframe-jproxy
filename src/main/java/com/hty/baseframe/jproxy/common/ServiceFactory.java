@@ -138,7 +138,7 @@ public class ServiceFactory {
 	}
 
 	/**
-	 * 获取远程服务
+	 * 获取远程服务(如果远程服务不存在，则动态生成)
 	 * @param type 接口类
 	 * @param conditions 条件
 	 * @return
@@ -146,8 +146,13 @@ public class ServiceFactory {
 	public static RemoteService getRemoteService(Class<?> type, String registryCenterId,
 												 Map<String, String> conditions) {
 		List<RemoteService> remoteServices = remote_services.get(type);
-		if(null == remoteServices || remoteServices.isEmpty()) {
-			throw new NoSuchServiceException("No RemoteService found of type " + type.getName());
+		if(null == remoteServices) {
+			synchronized (remote_services) {
+				remoteServices = remote_services.get(type);
+				if(null != remoteServices) {
+
+				}
+			}
 		}
 		for (RemoteService ls : remoteServices) {
 			if(ConditionMatchUtil.isMatch(conditions, ls.getConditions())) {
@@ -159,6 +164,10 @@ public class ServiceFactory {
 				return ls;
 			}
 		}
+		//从已存在的RemoteService找不到符合条件时，新建RemoteService
+		//动态注册的RemoteService必须是从注册中心获取
+//		RemoteService newRs = new RemoteService(type, null, null, );
+
 		throw new NoSuchServiceException("No RemoteService of type " + type.getName());
 	}
 	

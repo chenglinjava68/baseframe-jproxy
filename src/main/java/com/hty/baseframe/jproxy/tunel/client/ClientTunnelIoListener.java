@@ -8,24 +8,32 @@ import org.apache.mina.core.session.IoSession;
 public class ClientTunnelIoListener implements IoServiceListener {
 
 	@Override
-	public void serviceActivated(IoService service) throws Exception {
+	public void serviceActivated(IoService ioService) throws Exception {
+
 	}
 
 	@Override
-	public void serviceIdle(IoService service, IdleStatus idleStatus)
-			throws Exception {
+	public void serviceIdle(IoService ioService, IdleStatus idleStatus) throws Exception {
+
 	}
 
 	@Override
-	public void serviceDeactivated(IoService service) throws Exception {
+	public void serviceDeactivated(IoService ioService) throws Exception {
+
 	}
 
 	@Override
-	public void sessionCreated(IoSession session) throws Exception {
+	public void sessionCreated(IoSession ioSession) throws Exception {
+
 	}
 
 	@Override
-	public void sessionDestroyed(IoSession session) throws Exception {
+	public void sessionClosed(IoSession ioSession) throws Exception {
+
 	}
 
+	@Override
+	public void sessionDestroyed(IoSession ioSession) throws Exception {
+
+	}
 }
