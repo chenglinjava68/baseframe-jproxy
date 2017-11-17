@@ -18,7 +18,7 @@ public class Test2 {
 		JProxy jp = new JProxy();
 		jp.start("jproxy.xml");
 		new Timer().scheduleAtFixedRate(new PrintTask(), 0L, 5000L);
-		for(int i = 0; i < 50; i++) {
+		for(int i = 0; i < 30; i++) {
 			Thread t1 = new Thread(new Task());
 			t1.setName("Mother-Fucker-" + i);
 			t1.start();
@@ -30,7 +30,7 @@ public class Test2 {
 		@Override
 		public void run() {
 			long end = System.currentTimeMillis();
-			System.out.println(count + "--" + (500000/((end-start)*1.0/1000)) + "[次/s]" + "--TestService的socket创建次数：");
+			System.out.println(count + "--" + (count/((end-start)*1.0/1000)) + "[次/s]" + "--TestService的socket创建次数：");
 
 		}
 	}
@@ -44,7 +44,6 @@ public class Test2 {
 		@Override
 		public void run() {
 			Map<String, String> map = new HashMap<String, String>();
-			map.put("dbNum", "12");
 			TestService ts = ServiceFactory.getProxyInstance(TestService.class);
 
 			TestUser tu = new TestUser(100, "zhangsan");

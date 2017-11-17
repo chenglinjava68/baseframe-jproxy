@@ -7,8 +7,6 @@
 	<properties>
 		<!-- 本地服务端口 -->
 		<property name="local_service_port" value="9999"/>
-		<!-- 服务端socket池大小，默认为10-->
-		<property name="max_connection" value="10"/>
 		<!-- 服务类获取工具，该类由服务端实现 BeanProvider接口-->
 		<property name="bean_provider" value="test.beanprovider.TestBeanProvider"/>
 	</properties>
@@ -23,26 +21,18 @@
 	</registry>
 	
 	<service:remote>
-		<rservice class="test.service.TestService"
-				 token="123123" poolsize="10" center="localregistry">
+		<rservice class="test.service.TestService" center="localregistry">
 			<!-- 条件匹配参数，用于精确匹配服务。
 			说明：有些服务接口相同的情况下，不同的机器保存不同的数据，需要获取指定机器的代理服务。
 			远程服务将匹配参数暴露给注册中心，客户端请求携带相同的匹配参数就可以动态获取服务。
 			 -->
 			<conditions>
-
 			</conditions>
 		 </rservice>
 	</service:remote>
 	
 	<!--<service:local>
-		<lservice class="test.service.TestService" token="123123" version="1.0" center="localregistry">
-			&lt;!&ndash; 白名单，只有白名单上匹配的IP地址才能调用 &ndash;&gt;
-			<whitelist>
-				<host>192.168.*.*</host>
-				<host>127.0.0.*</host>
-				<host>244.8.56.133</host>
-			</whitelist>
+		<lservice class="test.service.TestService" center="localregistry">
 			&lt;!&ndash; 条件匹配参数，用于精确匹配服务。
 			说明：有些服务接口相同的情况下，不同的机器保存不同的数据，需要获取指定机器的代理服务。
 			远程服务将匹配参数暴露给注册中心，客户端请求携带相同的匹配参数就可以动态获取服务。

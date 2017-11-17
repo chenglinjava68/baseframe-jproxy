@@ -1,6 +1,8 @@
 package com.hty.baseframe.jproxy.client;
 
+import com.hty.baseframe.jproxy.bean.RegistryCenter;
 import com.hty.baseframe.jproxy.bean.RemoteService;
+import com.hty.baseframe.jproxy.common.RegistryFactory;
 import com.hty.baseframe.jproxy.exception.IoSessionException;
 import com.hty.baseframe.jproxy.exception.ServiceInvokationException;
 import com.hty.baseframe.jproxy.registry.ServiceRegistryService;
@@ -58,7 +60,13 @@ public class ClientSocketManager {
 		if(null == service.getCenterId() || service.getClazz() == ServiceRegistryService.class) {
 			logger.debug("trying to connect directly to remote host.");
 			try {
-				InetSocketAddress address = new InetSocketAddress(service.getHost(), service.getPort());
+				InetSocketAddress address;
+				if(service.getClazz() == ServiceRegistryService.class) {
+					RegistryCenter center = RegistryFactory.getInstance().getRegistryCenter(service.getCenterId());
+					address = new InetSocketAddress(center.getHost(), center.getPort());
+				} else {
+					address = new InetSocketAddress(service.getHost(), service.getPort());
+				}
 				tunnel = new ClientTunnel(address);
 				return tunnel;
 			} catch (IoSessionException e) {

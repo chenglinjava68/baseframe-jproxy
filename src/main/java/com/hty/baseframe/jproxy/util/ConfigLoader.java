@@ -105,20 +105,11 @@ public class ConfigLoader {
 							throw new IllegalConfigurationException("local service's attribute 'class' can not be null!");
 						}
 						Class<?> clazz = Class.forName(clazzstr);
-						LocalService ls = new LocalService(clazz, version, token, center);
+						LocalService ls = new LocalService(clazz, center);
 						List<DomElement> heles = pele.getElements();
 						if(null != heles)
 						for(DomElement hele : heles) {
-							if("whitelist".equals(hele.getName())) {
-								List<DomElement> wheles = hele.getElements();
-								if(null != wheles)
-								for(DomElement whele : wheles) {
-									if("host".equals(whele.getName())) {
-										String host = StringUtil.trim(whele.getValue());
-										ls.addClient(host);
-									}
-								}
-							} else if("conditions".equals(hele.getName())) {
+							if("conditions".equals(hele.getName())) {
 								List<DomElement> wheles = hele.getElements();
 								if(null != wheles)
 								for(DomElement whele : wheles) {
@@ -152,8 +143,6 @@ public class ConfigLoader {
 						String clazzName = StringUtil.trim(pele.getAttribute("class"));
 						String host = StringUtil.trim(pele.getAttribute("host"));
 						String port = StringUtil.trim(pele.getAttribute("port"));
-						String poolsize = StringUtil.trim(pele.getAttribute("poolsize"));
-						String token = StringUtil.trim(pele.getAttribute("token"));
 						String center = StringUtil.trim(pele.getAttribute("center"));
 						if(StringUtil.isEmpty(center)) {
 							center = null;
@@ -170,12 +159,8 @@ public class ConfigLoader {
 								throw new IllegalConfigurationException("remote service's attribute 'port' can not be null!");
 							}
 						}
-						if(StringUtil.isEmpty(poolsize)) {
-							throw new IllegalConfigurationException("remote service's attribute 'poolsize' can not be null!");
-						}
 						Class<?> clazz = Class.forName(clazzName);
-						RemoteService rs = new RemoteService(clazz, host, port, 
-								token, Integer.valueOf(poolsize), center);
+						RemoteService rs = new RemoteService(clazz, host, port, center);
 						
 						List<DomElement> heles = pele.getElements();
 						if(null != heles)

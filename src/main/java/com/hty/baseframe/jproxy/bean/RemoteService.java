@@ -16,11 +16,7 @@ public class RemoteService {
 	private final String host;
 	/** 远程服务端口*/
 	private int port;
-	/** 接口调用token */
-	private final String token;
-	/** 为此service保持的最大socket线程池大小 */
-	private Integer poolsize;
-	/** 
+	/**
 	 * 注册中心ID，如果此项不为空，则从注册中心获取服务地址，
 	 * 否则直接使用RemoteService的host:port直连 
 	 * */
@@ -36,12 +32,9 @@ public class RemoteService {
 	 * @param clazz 服务接口类
 	 * @param host 远程服务主机地址
 	 * @param _port 远程服务主机端口（字符串）
-	 * @param token 服务token
-	 * @param poolsize 服务socket池大小
 	 * @param centerId 注册中心
 	 */
-	public RemoteService(Class<?> clazz, String host, String _port, String token, 
-			int poolsize, String centerId) {
+	public RemoteService(Class<?> clazz, String host, String _port, String centerId) {
 		this.clazz = clazz;
 		this.host = host;
 		try {
@@ -49,30 +42,19 @@ public class RemoteService {
 		} catch (NumberFormatException e) {
 			this.port = 0;
 		}
-		this.token = token;
-		this.poolsize = poolsize;
 		this.centerId = centerId;
 	}
 	
 	public String addCondition(String name, String value) {
 		return conditions.put(name, value);
 	}
-	
+
 	public Map<String, String> getConditions() {
 		return conditions;
 	}
-	public String getCondition(String name) {
-		return conditions.get(name);
-	}
-	
+
 	public Class<?> getClazz() {
 		return clazz;
-	}
-	public String getToken() {
-		return token;
-	}
-	public Integer getPoolsize() {
-		return poolsize;
 	}
 	public String getHost() {
 		return host;
@@ -84,8 +66,7 @@ public class RemoteService {
 	@Override
 	public String toString() {
 		return "{clazz:'"+ clazz.getName() 
-				+"', host:'"+ host +"', port:'"+ port +"', token:'"+ token 
-				+"', poolsize:'"+ poolsize +"', centerId:'"+ centerId +"'}";
+				+"', host:'"+ host +"', port:'"+ port +"', centerId:'"+ centerId +"'}";
 	}
 
 	public String getCenterId() {
@@ -98,8 +79,7 @@ public class RemoteService {
 	 * @return
 	 */
 	public RemoteService clone(Map<String, String> conditions) {
-		RemoteService rs = new RemoteService(this.clazz, this.host, String.valueOf(this.port), this.token,
-				this.poolsize, this.centerId);
+		RemoteService rs = new RemoteService(this.clazz, this.host, String.valueOf(this.port), this.centerId);
 		if(null != conditions && !conditions.isEmpty()) {
 			for(Iterator<String> it = conditions.keySet().iterator(); it.hasNext();) {
 				String key = it.next();

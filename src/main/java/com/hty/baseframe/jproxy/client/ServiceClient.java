@@ -37,7 +37,6 @@ public class ServiceClient {
 		ServiceRequest req = new ServiceRequest();
 		req.setMethodEntity(me);
 		req.setClazz(service.getClazz());
-		req.addParameter("token", service.getToken());
 		byte[] bs = SerializeUtil.serialize(req);
 		String head = SerializeUtil.getHeadString(bs.length, Const.REQUEST_HEAD_SIZE);
 		try {

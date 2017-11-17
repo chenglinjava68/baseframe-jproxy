@@ -31,9 +31,6 @@
 <!ELEMENT rservice (conditions)*>
 <!ATTLIST rservice
     class CDATA #REQUIRED
-    token CDATA #IMPLIED
-    poolsize CDATA #REQUIRED
-    version CDATA #IMPLIED
     host CDATA #IMPLIED
     port CDATA #IMPLIED
     center CDATA #IMPLIED
@@ -52,8 +49,6 @@
 <!ELEMENT lservice (conditions|whitelist)*>
 <!ATTLIST lservice
     class CDATA #REQUIRED
-    token CDATA #IMPLIED
-    version CDATA #IMPLIED
     center CDATA #IMPLIED
 >
 

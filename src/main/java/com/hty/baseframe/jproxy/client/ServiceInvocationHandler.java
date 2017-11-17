@@ -47,7 +47,6 @@ public class ServiceInvocationHandler implements InvocationHandler {
 			ServiceRequest req = new ServiceRequest();
 			req.setMethodEntity(me);
 			req.setClazz(rs.getClazz());
-			req.addParameter("token", rs.getToken());
 			resp = tunnel.write(req);
 			//处理结果
 			if(resp.getCode() != ServiceResponse.SUCCESS) {

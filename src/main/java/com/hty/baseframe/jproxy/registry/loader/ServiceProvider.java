@@ -20,10 +20,6 @@ public class ServiceProvider implements Serializable {
 	private String clazz;
 	/** 服务提供者网络IP地址列表，可能存在多个地址 */
 	private Set<String> addresses;
-	/** 服务提供者的白名单 */
-	private Set<String> whitelist;
-	/** token */
-	private String token;
 	/** 服务端口 */
 	private int port;
 	/** 此参数由注册中心设置 */
@@ -39,8 +35,6 @@ public class ServiceProvider implements Serializable {
 	public ServiceProvider(LocalService ls) {
 		this.clazz = ls.getClazz().getName();
 		this.port = Integer.valueOf(SysProprties.getProperty("local_service_port"));
-		this.whitelist = ls.getClients();
-		this.token = null == ls.getToken() ? null : StringUtil.trim(ls.getToken());
 		this.conditions = ls.getConditions();
 		this.addresses = NetWorkInterfaceUtil.getLocalHostAddress();
 	}
@@ -89,22 +83,6 @@ public class ServiceProvider implements Serializable {
 
 	public void setAddresses(Set<String> addresses) {
 		this.addresses = addresses;
-	}
-
-	public Set<String> getWhitelist() {
-		return whitelist;
-	}
-
-	public void setWhitelist(Set<String> whitelist) {
-		this.whitelist = whitelist;
-	}
-
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
 	}
 
 	public int getPort() {

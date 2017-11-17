@@ -40,7 +40,7 @@ public class ClientTunnelHandler extends IoHandlerAdapter {
 			throw new ServiceInvokationException("Null attribute 'requestId'!");
 		}
 		String uuid = response.getRequestId();
-		Object lock = requestMapping.get(uuid);
+		Object lock = requestMapping.get(session.getId() + ":" + uuid);
 		Thread t = ThreadWaitResultLockUtil.getThread(lock);
 		if(null == t) {
 			throw new ServiceInvokationException("No thread bound with lock: " + lock + " uuid:" + uuid);

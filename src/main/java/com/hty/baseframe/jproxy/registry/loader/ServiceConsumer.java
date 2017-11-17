@@ -1,6 +1,5 @@
 package com.hty.baseframe.jproxy.registry.loader;
 
-import com.hty.baseframe.common.util.StringUtil;
 import com.hty.baseframe.jproxy.bean.RemoteService;
 import com.hty.baseframe.jproxy.util.NetWorkInterfaceUtil;
 
@@ -19,8 +18,6 @@ public final class ServiceConsumer implements Serializable {
 	private String clazz;
 	/** 服务消费者网络IP地址列表，可能存在多个地址 */
 	private Set<String> addresses;
-	/** token */
-	private String token;
 	/**
 	 * 此参数由注册中心设置 ,当提供者和消费者的注册中心检测IP相同时可以匹配彼此
 	 **/
@@ -33,7 +30,6 @@ public final class ServiceConsumer implements Serializable {
 	
 	public ServiceConsumer(RemoteService service) {
 		this.clazz = service.getClazz().getName();
-		this.token = null == service.getToken() ? null : StringUtil.trim(service.getToken());
 		this.conditions = service.getConditions();
 		this.addresses = NetWorkInterfaceUtil.getLocalHostAddress();
 	}
@@ -48,10 +44,6 @@ public final class ServiceConsumer implements Serializable {
 	public Set<String> getAddresses() {
 		return addresses;
 	}
-	public String getToken() {
-		return token;
-	}
-
 	public String getConsumerAddress() {
 		return consumerAddress;
 	}
@@ -62,7 +54,6 @@ public final class ServiceConsumer implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "{clazz: '"+ clazz +"', token: '"+ token
-				+"', addresses: '"+ addresses +"', consumerAddress: '"+ consumerAddress +"'}";
+		return "{clazz: '"+ clazz +"', addresses: '"+ addresses +"', consumerAddress: '"+ consumerAddress +"'}";
 	}
 }

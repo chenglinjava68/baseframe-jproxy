@@ -77,7 +77,7 @@ public class ServiceFactory {
 		}
 	}
 	/**
-	 * 获取一个本地服务
+	 * 获取一个本地服务(本地服务找不到不会自动动态添加)
 	 * @param type 服务接口类
 	 * @param conditions 服务版本
 	 * @return LocalService
@@ -112,33 +112,35 @@ public class ServiceFactory {
 			list = new ArrayList<RemoteService>();
 			remote_services.put(remoteService.getClazz(), list);
 		}
-		if(list.isEmpty()) {
-			logger.info("Add RemoteService with condition: " + remoteService.getConditions());
-			list.add(remoteService);
-		}
-		else
-		for (int i = 0; i < list.size(); i++) {
-			RemoteService ls = list.get(i);
-			int cmp = ConditionMatchUtil.mapCompare(ls.getConditions(), remoteService.getConditions());
-			if(cmp == 0 || cmp == 1) {
-				//已存在相同条件的RemoteService,不再添加
-				logger.warn("RemoteService is already exists with condition: " + remoteService.getConditions());
-				continue;
-			}
-			else if (cmp == 2) {
-				//新加入的RemoteService条件包含当前RemoteService，替换
-				logger.info("RemoteService replaced with condition: " + remoteService.getConditions());
-				list.set(i, remoteService);
-			}
-			else {
-				logger.info("Add RemoteService with condition: " + remoteService.getConditions());
-				list.add(remoteService);
+		synchronized (list) {
+		    if(list.isEmpty()) {
+                logger.info("Add RemoteService with condition: " + remoteService.getConditions());
+                list.add(remoteService);
+            } else
+			for (int i = 0; i < list.size(); i++) {
+				RemoteService ls = list.get(i);
+				int cmp = ConditionMatchUtil.mapCompare(ls.getConditions(), remoteService.getConditions());
+				if(cmp == 0 || cmp == 1) {
+					//已存在相同条件的RemoteService,不再添加
+					logger.warn("RemoteService is already exists with condition: " + remoteService.getConditions());
+					continue;
+				}
+				else if (cmp == 2) {
+					//新加入的RemoteService条件包含当前RemoteService，替换
+					logger.info("RemoteService replaced with condition: " + remoteService.getConditions());
+					list.set(i, remoteService);
+				}
+				else {
+					logger.info("Add RemoteService with condition: " + remoteService.getConditions());
+					list.add(remoteService);
+				}
 			}
 		}
 	}
 
 	/**
-	 * 获取远程服务(如果远程服务不存在，则动态生成)
+	 * 获取远程服务(如果远程服务不存在，则动态生成，
+	 * 动态生成的RemoteService必须从注册中心获取代理服务)
 	 * @param type 接口类
 	 * @param conditions 条件
 	 * @return
@@ -147,12 +149,7 @@ public class ServiceFactory {
 												 Map<String, String> conditions) {
 		List<RemoteService> remoteServices = remote_services.get(type);
 		if(null == remoteServices) {
-			synchronized (remote_services) {
-				remoteServices = remote_services.get(type);
-				if(null != remoteServices) {
-
-				}
-			}
+			createNewRemoteService(type, registryCenterId, conditions);
 		}
 		for (RemoteService ls : remoteServices) {
 			if(ConditionMatchUtil.isMatch(conditions, ls.getConditions())) {
@@ -166,9 +163,32 @@ public class ServiceFactory {
 		}
 		//从已存在的RemoteService找不到符合条件时，新建RemoteService
 		//动态注册的RemoteService必须是从注册中心获取
-//		RemoteService newRs = new RemoteService(type, null, null, );
+		return createNewRemoteService(type, registryCenterId, conditions);
+	}
 
-		throw new NoSuchServiceException("No RemoteService of type " + type.getName());
+	/**
+	 * 动态生成远程服务
+	 * @param type
+	 * @param registryCenterId
+	 * @param conditions
+	 * @return
+	 */
+	private static RemoteService createNewRemoteService(Class<?> type, String registryCenterId,
+										Map<String, String> conditions) {
+
+	    if(StringUtil.isEmpty(registryCenterId)) {
+            registryCenterId = RegistryFactory.uniqueCenterId();
+            if(StringUtil.isEmpty(registryCenterId))
+                throw new IllegalArgumentException("Dynamic created RemoteService must has a centerId!");
+		}
+		RemoteService rs = new RemoteService(type, null, null, registryCenterId);
+		if(null != conditions) {
+			for(Map.Entry<String, String> entry : conditions.entrySet()) {
+				rs.addCondition(entry.getKey(), entry.getValue());
+			}
+		}
+		addRemoteService(rs);
+		return rs;
 	}
 	
 	/**
