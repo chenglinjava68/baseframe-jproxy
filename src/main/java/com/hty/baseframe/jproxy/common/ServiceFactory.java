@@ -45,7 +45,7 @@ public class ServiceFactory {
 			throw new IllegalConfigurationException("Can not add a null LocalService!");
 		}
 		if(!localService.getClazz().isInterface()) {
-			throw new IllegalConfigurationException("LocalService '"+ localService.getClazz().getName() +"' is not an interface.");
+			throw new IllegalConfigurationException("LocalService: "+ localService.getClazz().getName() +" is not an interface.");
 		}
 		List<LocalService> list = local_services.get(localService.getClazz());
 		if(null == list) {
@@ -53,7 +53,7 @@ public class ServiceFactory {
 			local_services.put(localService.getClazz(), list);
 		}
 		if(list.isEmpty()) {
-			logger.info("Add LocalService with condition: " + localService.getConditions());
+			logger.info("Add LocalService: "+ localService.getClazz().getName() +" with condition: " + localService.getConditions());
 			list.add(localService);
 		}
 		else
@@ -62,16 +62,16 @@ public class ServiceFactory {
 			int cmp = ConditionMatchUtil.mapCompare(ls.getConditions(), localService.getConditions());
 			if(cmp == 0 || cmp == 1) {
 				//已存在相同条件的LocalService,不再添加
-				logger.warn("LocalService is already exists with condition: " + localService.getConditions());
+				logger.warn("LocalService: "+ localService.getClazz().getName() +" is already exists with condition: " + localService.getConditions());
 				continue;
 			}
 			else if (cmp == 2) {
 				//新加入的LocalService条件包含当前LocalService，替换
-				logger.info("LocalService replaced with condition: " + localService.getConditions());
+				logger.info("LocalService: "+ localService.getClazz().getName() +" replaced with condition: " + localService.getConditions());
 				list.set(i, localService);
 			}
 			else {
-				logger.info("Add LocalService with condition: " + localService.getConditions());
+				logger.info("Add LocalService: "+ localService.getClazz().getName() +" with condition: " + localService.getConditions());
 				list.add(localService);
 			}
 		}
@@ -114,7 +114,7 @@ public class ServiceFactory {
 		}
 		synchronized (list) {
 		    if(list.isEmpty()) {
-                logger.info("Add RemoteService with condition: " + remoteService.getConditions());
+                logger.info("Add RemoteService: "+ remoteService.getClazz().getName() +" with condition: " + remoteService.getConditions());
                 list.add(remoteService);
             } else
 			for (int i = 0; i < list.size(); i++) {
@@ -122,7 +122,7 @@ public class ServiceFactory {
 				int cmp = ConditionMatchUtil.mapCompare(ls.getConditions(), remoteService.getConditions());
 				if(cmp == 0 || cmp == 1) {
 					//已存在相同条件的RemoteService,不再添加
-					logger.warn("RemoteService is already exists with condition: " + remoteService.getConditions());
+					logger.warn("RemoteService: "+ remoteService.getClazz().getName() +" is already exists with condition: " + remoteService.getConditions());
 					continue;
 				}
 				else if (cmp == 2) {
@@ -131,7 +131,7 @@ public class ServiceFactory {
 					list.set(i, remoteService);
 				}
 				else {
-					logger.info("Add RemoteService with condition: " + remoteService.getConditions());
+					logger.info("Add RemoteService: "+ remoteService.getClazz().getName() +" with condition: " + remoteService.getConditions());
 					list.add(remoteService);
 				}
 			}

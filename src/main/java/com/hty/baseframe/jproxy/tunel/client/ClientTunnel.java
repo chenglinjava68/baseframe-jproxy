@@ -48,9 +48,11 @@ public class ClientTunnel implements Runnable {
 	public ClientTunnel(InetSocketAddress address) throws IoSessionException {
 		this.address = address;
         synchronized (sessionAddressMap) {
-            if(sessionAddressMap.containsKey(address.getAddress().getHostAddress() + ":" + address.getPort())) {
+			String key = address.getAddress().getHostAddress() + ":" + address.getPort();
+            if(sessionAddressMap.containsKey(key)) {
                 //说明当前服务创建的连接已经和其他服务创建的连接重复，可以复用
                 logger.info("Same connection exists so will not to create a new connection: " + address.toString());
+            	this.session = sessionAddressMap.get(key);
             } else {
                 if(!startTunnel()) {
                     throw new IoSessionException("Cannot connect to server!");
@@ -64,12 +66,16 @@ public class ClientTunnel implements Runnable {
 			return false;
 		}
 
+		//TODO 新建Tunnel时判断host和port，如何匹配到相同的session，则使用此session。
+
+
+
 		//设置监听器，断开自动重连
 		connector.addListener(new ClientTunnelIoListener() {
 			@Override
 			public void sessionDestroyed(IoSession old)
 					throws Exception {
-				logger.error("Session disconnect! trying to reconnect.");
+				logger.error("Session with id["+ old.getId() +"] disconnect! trying to reconnect.");
                 synchronized (sessionAddressMap) {
                     sessionAddressMap.remove(address.getAddress().getHostAddress() + ":" + address.getPort());
                 }
@@ -120,10 +126,11 @@ public class ClientTunnel implements Runnable {
 					session.setAttribute("requestMapping", requestMapping);
 					//告诉编码器session是服务端的session还是客户端的session
 					session.setAttribute("side", "client");
-					logger.info("Connection to server success!");
+					logger.info("Successfully connection to server!");
 					return true;
 				}
 			} catch (Exception e) {
+				//TODO 这里存在一个问题，的那个第一次连接不成功，则以后不会自动重连
 				logger.error("Connection to server failed: " + e.getMessage());
 				return false;
 			}
