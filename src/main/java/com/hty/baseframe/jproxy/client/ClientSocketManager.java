@@ -94,7 +94,7 @@ public class ClientSocketManager {
 					if(null == candidate) {
 						throw new ServiceInvokationException("No provider available for service: " + service.getClazz().getName());
 					}
-					logger.info("trying to connect to candidate host " + candidate + ":" + provider.getPort());
+					logger.info("trying to connect to candidate host: " + candidate + ":" + provider.getPort());
 					try {
 						InetSocketAddress address = new InetSocketAddress(candidate, provider.getPort());
 						tunnel = new ClientTunnel(address);

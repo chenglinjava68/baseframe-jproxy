@@ -1,5 +1,8 @@
 package com.hty.baseframe.jproxy.util;
 
+import com.hty.baseframe.jproxy.registry.loader.CandidateProvider;
+import com.hty.baseframe.jproxy.registry.loader.ServiceConsumer;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -8,9 +11,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.hty.baseframe.jproxy.registry.loader.CandidateProvider;
-import com.hty.baseframe.jproxy.registry.loader.ServiceConsumer;
-
 /**
  * 网络接口工具类，获取本机拥有的IP地址和测试远程主机是否可到达。
  * @author Tisnyi
@@ -18,6 +18,22 @@ import com.hty.baseframe.jproxy.registry.loader.ServiceConsumer;
 public class NetWorkInterfaceUtil {
 	
 	private static final String ipv4_regex = "[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+";
+
+    public static String getLocalHostName() {
+        String hostName;
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            hostName = addr.getHostName();
+        } catch (Exception ex) {
+            hostName = "";
+        }
+        return hostName;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(getLocalHostAddress());
+    }
+
 	/**
 	 * 获取本机拥有的网络IP地址列表
 	 * @return
