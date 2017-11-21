@@ -68,6 +68,7 @@ public class ClientSocketManager {
 					address = new InetSocketAddress(service.getHost(), service.getPort());
 				}
 				tunnel = new ClientTunnel(address);
+				logger.info("Create ClientTunnel for RemoteService: " + service);
 				return tunnel;
 			} catch (IoSessionException e) {
 				throw e;
@@ -99,6 +100,7 @@ public class ClientSocketManager {
 						InetSocketAddress address = new InetSocketAddress(candidate, provider.getPort());
 						tunnel = new ClientTunnel(address);
 						logger.info("successfully connected to remote host: " + candidate);
+						logger.info("Create ClientTunnel for RemoteService: " + service);
 						return tunnel;
 					} catch (Exception e) {
 						e.printStackTrace();

@@ -15,6 +15,9 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import java.net.InetSocketAddress;
 import java.util.*;
 
+/**
+ * Mina客户端隧道
+ */
 public class ClientTunnel implements Runnable {
 	
 	private static final Log logger = LogFactory.getLog(ClientTunnel.class);
@@ -45,51 +48,12 @@ public class ClientTunnel implements Runnable {
         //connector.getFilterChain().addLast("executor", new ExecutorFilter(executor));
         // 添加业务逻辑处理器类
         connector.setHandler(new ClientTunnelHandler());// 添加业务处理
-    }
-
-    private final InetSocketAddress address;
 
 
-    private Object getAddressLock(String key) {
-        synchronized (sameConnectionLocks) {
-            Object lock = sameConnectionLocks.get(key);
-            if(null == lock) {
-                lock = new Object();
-                sameConnectionLocks.put(key, lock);
-            }
-            return lock;
-        }
-    }
-
-	public ClientTunnel(InetSocketAddress address) throws IoSessionException {
-        this.address = address;
-        String key = address.getAddress().getHostAddress() + ":" + address.getPort();
-        //新建Tunnel时判断host和port，如果匹配到相同的session，则使用此session。
-        if(sessionAddressMap.containsKey(key)) {
-            //说明当前服务创建的连接已经和其他服务创建的连接重复，可以复用
-            logger.info("Same connection exists so will not to create a new connection: " + address.toString());
-        } else {
-            Object lock = getAddressLock(key);
-            //在相同地址端口上创建连接时加锁，防止创建多个连接
-            synchronized (lock) {
-                if(sessionAddressMap.containsKey(key)) {
-                    //说明当前服务创建的连接已经和其他服务创建的连接重复，可以复用
-                    logger.info("Same connection exists so will not to create a new connection: " + address.toString());
-                } else if(!startTunnel(address)) {
-                    throw new IoSessionException("Cannot connect to server!");
-                }
-            }
-        }
-	}
-
-	private boolean startTunnel(final InetSocketAddress address) {
-		if(!NetWorkInterfaceUtil.hostReachale(address.getAddress().getHostAddress())) {
-			return false;
-		}
+        //断线监听器
         ClientTunnelIoListener futureListener = new ClientTunnelIoListener() {
             @Override
             public void sessionDestroyed(IoSession old) throws Exception {
-
                 //TODO 重连的时候会出现创建多个连接现象
                 String remoteIp = ((InetSocketAddress) old.getRemoteAddress()).getAddress().getHostAddress();
                 int remotePort = ((InetSocketAddress) old.getRemoteAddress()).getPort();
@@ -120,18 +84,70 @@ public class ClientTunnel implements Runnable {
                             }
                             session.setAttribute("requestMapping", requestMapping);
                             session.setAttribute("side", "client");
-                            logger.info("Reconnect to server success: " + address);
+                            logger.info("Reconnect to server success: " + remoteIp + ":" + remotePort);
                             break;
                         }
                     } catch (Exception e) {
-                        logger.error("Reconnect to server["+ address +"] failed: " + e.getMessage());
+                        logger.error("["+ Thread.currentThread().getName() +"]Reconnect to server[" + remoteIp + ":" + remotePort +"] failed: " + e.getMessage());
                         Thread.sleep(10000);
                     }
                 }
             }
         };
-		//设置监听器，断开自动重连
-		connector.addListener(futureListener);
+
+        //设置监听器，断开自动重连
+        connector.addListener(futureListener);
+
+    }
+
+    private final InetSocketAddress address;
+
+    /**
+     * 获取连接锁
+     * @param key
+     * @return
+     */
+    private Object getAddressLock(String key) {
+        synchronized (sameConnectionLocks) {
+            Object lock = sameConnectionLocks.get(key);
+            if(null == lock) {
+                lock = new Object();
+                sameConnectionLocks.put(key, lock);
+            }
+            return lock;
+        }
+    }
+
+	public ClientTunnel(InetSocketAddress address) throws IoSessionException {
+        this.address = address;
+        String key = address.getAddress().getHostAddress() + ":" + address.getPort();
+        //新建Tunnel时判断host和port，如果匹配到相同的session，则使用此session。
+        if(sessionAddressMap.containsKey(key)) {
+            //说明当前服务创建的连接已经和其他服务创建的连接重复，可以复用
+            logger.info("Same connection exists so will not to create a new connection: " + address.toString());
+        } else {
+            Object lock = getAddressLock(key);
+            //在相同地址端口上创建连接时加锁，防止创建多个连接
+            synchronized (lock) {
+                if(sessionAddressMap.containsKey(key)) {
+                    //说明当前服务创建的连接已经和其他服务创建的连接重复，可以复用
+                    logger.info("Same connection exists so will not to create a new connection: " + address.toString());
+                } else if(!startTunnel()) {
+                    throw new IoSessionException("Cannot connect to server!");
+                }
+            }
+        }
+	}
+
+    /**
+     * 开启隧道
+     * @return
+     */
+	private boolean startTunnel() {
+        //地址是否能够连通
+        if(!NetWorkInterfaceUtil.hostReachale(this.address.getAddress().getHostAddress())) {
+			return false;
+		}
 
 		//首次连接
 		for(;;) {
@@ -151,8 +167,6 @@ public class ClientTunnel implements Runnable {
 				}
 			} catch (Exception e) {
 				logger.error("Connect to server["+ address +"] failed: " + e.getMessage());
-				//连接失败，移除监听器
-				connector.removeListener(futureListener);
 				return false;
 			}
 		}

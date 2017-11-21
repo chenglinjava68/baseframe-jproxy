@@ -56,7 +56,7 @@ public class ServerTunnelHandler extends IoHandlerAdapter {
 		idleTimes++;
 		if(idleTimes > 30) {
 			logger.warn("session closed by server: idle too long.");
-			session.close(true);
+//			session.close(true);
 		}
 		sessionIdleTimes.put(session.getId(), idleTimes);
 	}
