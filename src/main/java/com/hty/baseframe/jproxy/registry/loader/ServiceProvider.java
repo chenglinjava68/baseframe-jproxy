@@ -1,6 +1,5 @@
 package com.hty.baseframe.jproxy.registry.loader;
 
-import com.hty.baseframe.common.util.StringUtil;
 import com.hty.baseframe.jproxy.bean.LocalService;
 import com.hty.baseframe.jproxy.common.SysProprties;
 import com.hty.baseframe.jproxy.util.NetWorkInterfaceUtil;
@@ -24,8 +23,10 @@ public class ServiceProvider implements Serializable {
 	private int port;
 	/** 此参数由注册中心设置 */
 	private String providerLookBackAddress;
-	/** 此参数由注册中心设置, 命中次数 */
-	private int hitcount = 0;
+    /** 此参数由注册中心设置, 命中次数 */
+    private int hitcount = 0;
+    /** 此参数由注册中心设置, sessionID */
+    private Long sessionId;
 
 	private Map<String, String> conditions = new HashMap<String, String>();
 	
@@ -65,11 +66,18 @@ public class ServiceProvider implements Serializable {
 	 * @return
 	 */
 	public String getUUID() {
-		return this.providerLookBackAddress + ":" + this.port + ":" + this.clazz;
+		return sessionId + "@" + this.providerLookBackAddress + ":" + this.port + ":" + this.clazz;
 	}
 
+    public Long getSessionId() {
+        return sessionId;
+    }
 
-	public String getClazz() {
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getClazz() {
 		return clazz;
 	}
 

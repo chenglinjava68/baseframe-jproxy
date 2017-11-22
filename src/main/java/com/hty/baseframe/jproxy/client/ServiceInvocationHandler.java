@@ -37,17 +37,22 @@ public class ServiceInvocationHandler implements InvocationHandler {
 		me.setArgs(args);
 		me.setArgsTypes(method.getParameterTypes());
 		ClientSocketManager socketManager = ClientSocketManager.getInstance();
-		ClientTunnel tunnel = null;
+		String tunnelKey;
 		try {
 			//socket = SocketClientManager.getInstance().getPoolSocket(rs);
-			tunnel = socketManager.getTunnel(rs);
+
 			//System.out.println(Thread.currentThread().getName() + "释放"+ rs.getClazz() +"锁");
 			//System.out.println(Thread.currentThread().getName() + " 得到了socket");
 			ServiceResponse resp = null;
 			ServiceRequest req = new ServiceRequest();
 			req.setMethodEntity(me);
 			req.setClazz(rs.getClazz());
-			resp = tunnel.write(req);
+            //先获取旧的tunnelKey，如果存在就使用
+            tunnelKey = socketManager.getTunnelKey(rs);
+            if(null == tunnelKey || null == ClientTunnel.getSession(tunnelKey)) {
+                tunnelKey = socketManager.getTunnelKey(rs);
+            }
+            resp = ClientTunnel.write(req, tunnelKey);
 			//处理结果
 			if(resp.getCode() != ServiceResponse.SUCCESS) {
 				//远程处理发生内部错误
@@ -72,14 +77,6 @@ public class ServiceInvocationHandler implements InvocationHandler {
 				return resp.getResult();
 			}
 		} catch (Exception e) {
-			//System.out.println("Error class name = " + e.getClass().getName());
-			if(null != tunnel) {
-				if(e.getClass().getName().startsWith("java.net.")) {
-					//Socket异常，要废弃当前socket
-				} else {
-					//此异常为其他异常，如验证失败等，但是请求交互正常，socket状态正常。
-				}
-			}
 			throw e;
 		}
 	}

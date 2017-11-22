@@ -30,7 +30,7 @@ public class ServerTunnelHandler extends IoHandlerAdapter {
 		this.listener = listener;
 	}
 	/*记录每个session连续空闲次数*/
-	private static Map<Long, Long> sessionIdleTimes = new HashMap<Long, Long>();
+	private static final Map<Long, Long> sessionIdleTimes = new HashMap<Long, Long>();
 
 
 	@Override
@@ -54,10 +54,10 @@ public class ServerTunnelHandler extends IoHandlerAdapter {
 			idleTimes = 0L;
 		}
 		idleTimes++;
-		if(idleTimes > 30) {
+		/*if(idleTimes > 30) {
 			logger.warn("session closed by server: idle too long.");
-//			session.close(true);
-		}
+			session.close(true);
+		}*/
 		sessionIdleTimes.put(session.getId(), idleTimes);
 	}
 
@@ -73,7 +73,7 @@ public class ServerTunnelHandler extends IoHandlerAdapter {
 	
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
-		logger.info("Server closed.");
+		logger.debug("Session closed.");
 		sessionIdleTimes.remove(session.getId());
 		if(null != listener) {
 			listener.disconnect(session);
@@ -83,7 +83,7 @@ public class ServerTunnelHandler extends IoHandlerAdapter {
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause)
 			throws Exception {
-		logger.error("Server error: " + cause.getMessage());
+		logger.error(cause.getMessage());
 		cause.printStackTrace();
 	}
 	

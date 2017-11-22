@@ -1,5 +1,6 @@
 package com.hty.baseframe.jproxy.client;
 
+import com.hty.baseframe.common.util.StringUtil;
 import com.hty.baseframe.jproxy.bean.RegistryCenter;
 import com.hty.baseframe.jproxy.bean.RemoteService;
 import com.hty.baseframe.jproxy.common.RegistryFactory;
@@ -15,10 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 客户端Socket管理类，控制每个远程服务的Socket连接状态，连接数，创建新的连接等。
@@ -31,34 +29,41 @@ public class ClientSocketManager {
 	/** 单实例 */
 	private static ClientSocketManager clientSocketManager;
 
-	private Map<RemoteService, ClientTunnel> tunnelMap = new HashMap<RemoteService, ClientTunnel>(5);
+	private static final Map<RemoteService, String> tunnelMap =
+            Collections.synchronizedMap(new HashMap<RemoteService, String>(5));
 
-	public static synchronized ClientSocketManager getInstance() {
+	static synchronized ClientSocketManager getInstance() {
 		if(null == clientSocketManager) {
-			clientSocketManager = new ClientSocketManager();
+            clientSocketManager = new ClientSocketManager();
 		}
 		return clientSocketManager;
 	}
 
-	public ClientTunnel getTunnel(RemoteService rs) {
-		ClientTunnel tunnel = tunnelMap.get(rs);
-		if(null == tunnel) {
+	String getTunnelKey(RemoteService rs) throws Exception {
+        String tunnelKey = tunnelMap.get(rs);
+		if(null == tunnelKey) {
 			synchronized (rs) {
-				tunnel = tunnelMap.get(rs);
-				if(null == tunnel) {
-					tunnel = createTunnel(rs);
-					tunnelMap.put(rs, tunnel);
+                tunnelKey = tunnelMap.get(rs);
+				if(null == tunnelKey) {
+                    tunnelKey = createTunnel(rs);
+					tunnelMap.put(rs, tunnelKey);
 				}
 			}
 		}
-		return tunnel;
+		return tunnelKey;
 	}
 
-	private ClientTunnel createTunnel(RemoteService service) {
+    /**
+     * 产生新的连接
+     * @param service
+     * @return
+     */
+	private String createTunnel(RemoteService service) throws Exception {
+	    //TODO 如果已经连接成功的服务出现永久性（或长期）离线状态，则会出现连接失败，那么客户端会不断尝试重连，应该重新从注册中心获取提供者
+
 		//没有配置注册中心的远程服务，直连服务提供者主机
-		ClientTunnel tunnel;
 		if(null == service.getCenterId() || service.getClazz() == ServiceRegistryService.class) {
-			logger.debug("trying to connect directly to remote host.");
+			logger.info("trying to connect directly to remote host.");
 			try {
 				InetSocketAddress address;
 				if(service.getClazz() == ServiceRegistryService.class) {
@@ -67,25 +72,17 @@ public class ClientSocketManager {
 				} else {
 					address = new InetSocketAddress(service.getHost(), service.getPort());
 				}
-				tunnel = new ClientTunnel(address);
-				logger.info("Create ClientTunnel for RemoteService: " + service);
-				return tunnel;
+                String tunnelKey = ClientTunnel.initTunnel(service, address);
+                return tunnelKey;
 			} catch (IoSessionException e) {
 				throw e;
 			}
 		} else {
-			logger.debug("trying to get provider from registry center.");
+			logger.debug("Trying to get provider from registry center.");
 			ServiceConsumer consumer;
 			CandidateProvider provider;
-			Map<String, String> conditions = service.getConditions();
-			if(null == conditions || conditions.isEmpty()) {
-				consumer = new ServiceConsumer(service);
-				provider = JProxyServiceRegistry.getInstance().getAvailableService(service, consumer);
-			} else {
-				RemoteService rs = service.clone(conditions);
-				consumer = new ServiceConsumer(rs);
-				provider = JProxyServiceRegistry.getInstance().getAvailableService(rs, consumer);
-			}
+            consumer = new ServiceConsumer(service);
+            provider = JProxyServiceRegistry.getInstance().getAvailableService(service, consumer);
 			logger.info("provider was successfully obtained: " + provider);
 			if(null != provider) {
 				Set<String> excludes = new HashSet<String>();
@@ -98,10 +95,8 @@ public class ClientSocketManager {
 					logger.info("trying to connect to candidate host: " + candidate + ":" + provider.getPort());
 					try {
 						InetSocketAddress address = new InetSocketAddress(candidate, provider.getPort());
-						tunnel = new ClientTunnel(address);
-						logger.info("successfully connected to remote host: " + candidate);
-						logger.info("Create ClientTunnel for RemoteService: " + service);
-						return tunnel;
+						String tunnelKey = ClientTunnel.initTunnel(service, address);
+						return tunnelKey;
 					} catch (Exception e) {
 						e.printStackTrace();
 						excludes.add(candidate);
@@ -113,4 +108,16 @@ public class ClientSocketManager {
 			throw new ServiceInvokationException("No provider for service: " + service.getClazz().getName());
 		}
 	}
+
+    public static void removeTunnel(String key) {
+        synchronized (tunnelMap) {
+            for(Iterator<RemoteService> it = tunnelMap.keySet().iterator(); it.hasNext();) {
+                String _key = tunnelMap.get(it.next());
+                if(StringUtil.equals(key, _key)) {
+                    it.remove();
+                }
+            }
+        }
+    }
+    //END
 }

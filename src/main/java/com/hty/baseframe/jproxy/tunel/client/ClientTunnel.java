@@ -1,7 +1,9 @@
 package com.hty.baseframe.jproxy.tunel.client;
 
+import com.hty.baseframe.jproxy.bean.RemoteService;
 import com.hty.baseframe.jproxy.bean.ServiceRequest;
 import com.hty.baseframe.jproxy.bean.ServiceResponse;
+import com.hty.baseframe.jproxy.client.ClientSocketManager;
 import com.hty.baseframe.jproxy.exception.IoSessionException;
 import com.hty.baseframe.jproxy.tunel.common.ServiceProtocolCodecFactory;
 import com.hty.baseframe.jproxy.util.NetWorkInterfaceUtil;
@@ -13,6 +15,7 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.*;
 
 /**
@@ -48,6 +51,8 @@ public class ClientTunnel implements Runnable {
         //connector.getFilterChain().addLast("executor", new ExecutorFilter(executor));
         // 添加业务逻辑处理器类
         connector.setHandler(new ClientTunnelHandler());// 添加业务处理
+        //连接超时：10000ms（10s）
+        connector.setConnectTimeoutMillis(10000);
 
 
         //断线监听器
@@ -57,22 +62,30 @@ public class ClientTunnel implements Runnable {
                 //TODO 重连的时候会出现创建多个连接现象
                 String remoteIp = ((InetSocketAddress) old.getRemoteAddress()).getAddress().getHostAddress();
                 int remotePort = ((InetSocketAddress) old.getRemoteAddress()).getPort();
-                logger.error("Session with id["+ old.getId() +"] disconnect! trying to reconnect.");
+                String key = remoteIp + ":" + remotePort;
+                ClientSocketManager.removeTunnel(key);
                 //将绑定该主机端口的Session释放
                 synchronized (sessionAddressMap) {
-                    logger.info("Removing session ["+ remoteIp + ":" + remotePort +"] " + old);
-                    sessionAddressMap.put(remoteIp + ":" + remotePort, null);
+                    logger.error("Session disconnect, removing it ["+ key +"] " + old);
+                    sessionAddressMap.put(key, null);
                 }
                 //唤醒所有在当前session上等待的线程
                 synchronized (requestMapping) {
                     for (Iterator<String> it = requestMapping.keySet().iterator(); it.hasNext();) {
                         String reqId = it.next();
                         if(reqId.startsWith(old.getId()+":")) {
-                            ThreadWaitResultLockUtil.notifyThread(requestMapping.get(reqId), null, new IoSessionException("Connection destroyed!"));
-                            it.remove();
+                            try {
+                                ThreadWaitResultLockUtil.notifyThread(requestMapping.get(reqId), null, new IoSessionException("Connection destroyed!"));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                it.remove();
+                            }
                         }
                     }
                 }
+                //自动重连禁用，改为按需从注册中心重新获取服务重连
+                /*
                 for(;;) {
                     try {
                         ConnectFuture future = connector.connect(old.getRemoteAddress());// 创建连接
@@ -92,22 +105,26 @@ public class ClientTunnel implements Runnable {
                         Thread.sleep(10000);
                     }
                 }
+                */
+
             }
         };
 
         //设置监听器，断开自动重连
         connector.addListener(futureListener);
-
     }
 
-    private final InetSocketAddress address;
+    /**
+     * 构造私有化
+     */
+    private ClientTunnel() { }
 
     /**
      * 获取连接锁
      * @param key
      * @return
      */
-    private Object getAddressLock(String key) {
+    private static Object getAddressLock(String key) {
         synchronized (sameConnectionLocks) {
             Object lock = sameConnectionLocks.get(key);
             if(null == lock) {
@@ -118,67 +135,71 @@ public class ClientTunnel implements Runnable {
         }
     }
 
-	public ClientTunnel(InetSocketAddress address) throws IoSessionException {
-        this.address = address;
+    /**
+     * 为RemoteService初始化Tunnel，返回IoSession的key
+     * @param service
+     * @param address
+     * @return
+     */
+    public static String initTunnel(RemoteService service, InetSocketAddress address) throws Exception {
         String key = address.getAddress().getHostAddress() + ":" + address.getPort();
         //新建Tunnel时判断host和port，如果匹配到相同的session，则使用此session。
-        if(sessionAddressMap.containsKey(key)) {
+        if(null != sessionAddressMap.get(key)) {
             //说明当前服务创建的连接已经和其他服务创建的连接重复，可以复用
             logger.info("Same connection exists so will not to create a new connection: " + address.toString());
+            return key;
         } else {
             Object lock = getAddressLock(key);
             //在相同地址端口上创建连接时加锁，防止创建多个连接
             synchronized (lock) {
-                if(sessionAddressMap.containsKey(key)) {
+                if(null != sessionAddressMap.get(key)) {
                     //说明当前服务创建的连接已经和其他服务创建的连接重复，可以复用
                     logger.info("Same connection exists so will not to create a new connection: " + address.toString());
-                } else if(!startTunnel()) {
-                    throw new IoSessionException("Cannot connect to server!");
+                } else {
+                    startTunnel(service, address);
                 }
+                return key;
             }
         }
-	}
+    }
 
     /**
      * 开启隧道
      * @return
      */
-	private boolean startTunnel() {
+	private static boolean startTunnel(RemoteService service, InetSocketAddress address) throws Exception {
         //地址是否能够连通
-        if(!NetWorkInterfaceUtil.hostReachale(this.address.getAddress().getHostAddress())) {
+        if(!NetWorkInterfaceUtil.hostReachale(address.getAddress().getHostAddress())) {
 			return false;
 		}
-
+        IoSession session;
 		//首次连接
-		for(;;) {
-			try {
-				ConnectFuture future = connector.connect(address);// 创建连接
-				future.awaitUninterruptibly();// 等待连接创建成功  
-				IoSession session = future.getSession();// 获取会话
-				if (session.isConnected()) {
-				    synchronized (sessionAddressMap) {
-                        sessionAddressMap.put(address.getAddress().getHostAddress() + ":" + address.getPort(), session);
-                    }
-					session.setAttribute("requestMapping", requestMapping);
-					//告诉编码器session是服务端的session还是客户端的session
-					session.setAttribute("side", "client");
-					logger.info("Successfully connect to server: " + address.getAddress().getHostAddress() + ":" + address.getPort());
-					return true;
-				}
-			} catch (Exception e) {
-				logger.error("Connect to server["+ address +"] failed: " + e.getMessage());
-				return false;
-			}
-		}
-//		session.getCloseFuture().awaitUninterruptibly();// 等待连接断开
+        try {
+            ConnectFuture future = connector.connect(address);// 创建连接
+            future.awaitUninterruptibly();// 等待连接创建成功
+            session = future.getSession();// 获取会话
+            if (session.isConnected()) {
+                synchronized (sessionAddressMap) {
+                    sessionAddressMap.put(address.getAddress().getHostAddress() + ":" + address.getPort(), session);
+                }
+                session.setAttribute("requestMapping", requestMapping);
+                //告诉编码器session是服务端的session还是客户端的session
+                session.setAttribute("side", "client");
+                logger.info("Successfully connect to server: " + address.getAddress().getHostAddress() + ":" + address.getPort());
+                return true;
+            }
+            throw new SocketException("Cannot open connection to server!");
+        } catch (Exception e) {
+            logger.error("Connect to server ["+ address +"] failed: " + e.getMessage());
+            throw e;
+        }
 	}
 
 	/**
 	 * 获取当前session
 	 * @return
 	 */
-	public IoSession getSession() {
-        String key = this.address.getAddress().getHostAddress() + ":" + this.address.getPort();
+	public static IoSession getSession(String key) {
         IoSession session = sessionAddressMap.get(key);
 		if(null != session && session.isConnected()) {
 			return session;
@@ -191,8 +212,8 @@ public class ClientTunnel implements Runnable {
 	 * 线程向tunnel写请求数据
 	 * @param request
 	 */
-	public ServiceResponse write(ServiceRequest request) throws Exception {
-		IoSession session = getSession();
+	public static ServiceResponse write(ServiceRequest request, String key) throws Exception {
+		IoSession session = getSession(key);
 		if(null != session) {
 			String uuid = UUID.randomUUID().toString();
 			Object lock = ThreadWaitResultLockUtil.getThreadLock(Thread.currentThread());
@@ -204,7 +225,7 @@ public class ClientTunnel implements Runnable {
 			ServiceResponse resp = (ServiceResponse) ThreadWaitResultLockUtil.waitThread();
 			return resp;
 		} else {
-			throw new IoSessionException("Current Session is unavailable!");
+			throw new IoSessionException("Current session is unavailable!");
 		}
 
 	}
@@ -216,6 +237,4 @@ public class ClientTunnel implements Runnable {
 	@Override
 	public void run() {
 	}
-
-
 }

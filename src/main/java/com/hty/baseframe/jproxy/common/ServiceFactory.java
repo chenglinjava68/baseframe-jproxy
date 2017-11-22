@@ -85,14 +85,14 @@ public class ServiceFactory {
 	public static LocalService getLocalService(Class<?> type, Map<String, String> conditions) {
 		List<LocalService> localServices = local_services.get(type);
 		if(null == localServices || localServices.isEmpty()) {
-			throw new NoSuchServiceException("No LocalService found of type " + type.getName());
+			throw new NoSuchServiceException("No LocalService found of type: " + type.getName() + " with conditions: " + conditions);
 		}
 		for (LocalService ls : localServices) {
 			if(ConditionMatchUtil.isMatch(conditions, ls.getConditions())) {
 				return ls;
 			}
 		}
-		throw new NoSuchServiceException("No LocalService of type " + type.getName());
+		throw new NoSuchServiceException("No LocalService of type " + type.getName() + " with conditions: " + conditions);
 	}
 	
 	
@@ -127,7 +127,7 @@ public class ServiceFactory {
 				}
 				else if (cmp == 2) {
 					//新加入的RemoteService条件包含当前RemoteService，替换
-					logger.info("RemoteService replaced with condition: " + remoteService.getConditions());
+					logger.info("RemoteService ["+ remoteService +"] replaced with condition: " + remoteService.getConditions());
 					list.set(i, remoteService);
 				}
 				else {
