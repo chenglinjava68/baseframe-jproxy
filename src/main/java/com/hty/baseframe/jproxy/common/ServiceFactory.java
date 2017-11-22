@@ -151,6 +151,7 @@ public class ServiceFactory {
 		if(null == remoteServices) {
 			createNewRemoteService(type, registryCenterId, conditions);
 		}
+        remoteServices = remote_services.get(type);
 		for (RemoteService ls : remoteServices) {
 			if(ConditionMatchUtil.isMatch(conditions, ls.getConditions())) {
 				if(!StringUtil.isEmpty(registryCenterId)) {
