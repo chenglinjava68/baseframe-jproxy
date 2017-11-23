@@ -50,6 +50,7 @@ public class ServiceInvocationHandler implements InvocationHandler {
             //先获取旧的tunnelKey，如果存在就使用
             tunnelKey = socketManager.getTunnelKey(rs);
             if(null == tunnelKey || null == ClientTunnel.getSession(tunnelKey)) {
+				ClientSocketManager.removeTunnel(tunnelKey);
                 tunnelKey = socketManager.getTunnelKey(rs);
             }
             resp = ClientTunnel.write(req, tunnelKey);

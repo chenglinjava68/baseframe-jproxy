@@ -156,7 +156,9 @@ public class ClientTunnel implements Runnable {
                     //说明当前服务创建的连接已经和其他服务创建的连接重复，可以复用
                     logger.info("Same connection exists so will not to create a new connection: " + address.toString());
                 } else {
-                    startTunnel(service, address);
+                    if(startTunnel(service, address)) {
+                        return key;
+                    }
                 }
                 return key;
             }
@@ -168,9 +170,10 @@ public class ClientTunnel implements Runnable {
      * @return
      */
 	private static boolean startTunnel(RemoteService service, InetSocketAddress address) throws Exception {
+        logger.info("Initial tunnel: " + address);
         //地址是否能够连通
         if(!NetWorkInterfaceUtil.hostReachale(address.getAddress().getHostAddress())) {
-			return false;
+			throw new SocketException("Cannot connect to remote host: " + address);
 		}
         IoSession session;
 		//首次连接
