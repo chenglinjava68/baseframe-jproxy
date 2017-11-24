@@ -19,8 +19,7 @@ import java.net.InetSocketAddress;
 import java.util.*;
 
 /**
- * 客户端Socket管理类，控制每个远程服务的Socket连接状态，连接数，创建新的连接等。
- * 解决了多线程并发问题，保证在高密度请求下Socket连接不会泄漏。
+ * 客户端连接管理类，控制每个RemoteService的连接key信息的注册和获取，提供了统一的连接管理。
  * @author Tisnyi
  */
 public class ClientSocketManager {

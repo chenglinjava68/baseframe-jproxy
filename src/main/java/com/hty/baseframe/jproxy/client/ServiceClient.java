@@ -15,8 +15,10 @@ import java.net.Socket;
 /**
  * 本地调用远程接口的数据发送工具类。<br>
  * 发送请求到远程主机并返回远程处理结果。
+ * (已废弃，数据传输改为Mina)
  * @author Tisnyi
  */
+@Deprecated
 public class ServiceClient {
 	
 	private final static Log logger = LogFactory.getLog(ServiceClient.class);
