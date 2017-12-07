@@ -1,10 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>com.hty.baseframe.jproxy</groupId>
+    <groupId>com.hty.baseframe</groupId>
   <artifactId>baseframe-jproxy</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>baseframe-jproxy</name>
@@ -18,11 +17,9 @@
 		<resources>
 			<resource>
 				<directory>src/main/java</directory>
-				<includes>
-					<include>**/*</include>
-				</includes>
+
 				<excludes>
-					<exclude>**/*.java</exclude>
+					<exclude>**/*.xml</exclude>
 				</excludes>
 			</resource>
 		</resources>
@@ -127,9 +124,9 @@
 	
 	
 	<dependency>
-		<groupId>com.hty.baseframe.common</groupId>
-		<artifactId>baseframe-common</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+        <groupId>com.hty.baseframe</groupId>
+        <artifactId>baseframe-common</artifactId>
+		<version>1.0.0</version>
 	</dependency>
 	
   </dependencies>
