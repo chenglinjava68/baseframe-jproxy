@@ -1,11 +1,11 @@
 package com.hty.baseframe.jproxy;
 
-import java.util.Timer;
-
 import com.hty.baseframe.jproxy.registry.ServiceRegistryManager;
 import com.hty.baseframe.jproxy.server.ServiceServer;
 import com.hty.baseframe.jproxy.server.SocketListener;
 import com.hty.baseframe.jproxy.util.ConfigLoader;
+
+import java.util.Timer;
 
 /**
  * ==========================<br>
@@ -41,7 +41,8 @@ public class JProxy {
 	 * 此方式专为router使用
 	 * @throws Exception
 	 */
-	protected void start(SocketListener listener) throws Exception {
+	public void start1(SocketListener listener) throws Exception {
+        printWelcome();
 		ServiceServer server = new ServiceServer(listener);
 		Thread t_server = new Thread(server);
 		t_server.start();
