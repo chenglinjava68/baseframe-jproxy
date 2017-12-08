@@ -93,7 +93,8 @@ public class ServiceInvocationHandler implements InvocationHandler {
 	 */
 	public static boolean isArgsSerializabled(Object[] args){
 		for(Object obj : args){
-			if(!(obj instanceof Serializable)) {
+		    //bug fix: null type is null Serializable
+			if(null != obj && !(obj instanceof Serializable)) {
 				return false;
 			}
 		}
