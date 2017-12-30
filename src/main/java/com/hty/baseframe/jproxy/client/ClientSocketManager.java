@@ -12,8 +12,6 @@ import com.hty.baseframe.jproxy.registry.loader.CandidateProvider;
 import com.hty.baseframe.jproxy.registry.loader.ServiceConsumer;
 import com.hty.baseframe.jproxy.tunel.client.ClientTunnel;
 import com.hty.baseframe.jproxy.util.NetWorkInterfaceUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
