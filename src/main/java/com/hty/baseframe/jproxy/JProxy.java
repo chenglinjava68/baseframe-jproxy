@@ -24,12 +24,12 @@ import java.util.Timer;
  * JProxy.start();
  * </pre>
  * 来启动JProxy服务。
- * @author Tisnyi
+ *
+ * @author Hetianyi 2017/12/30
  * @version 1.0
  */
 public class JProxy {
-	//private Log logger = LogFactory.getLog(JProxy.class);
-	
+
 	protected void printWelcome() {
 		System.out.println("\n+-------------------------------------------------------+\n" + 
 				"| * JProxy v1.0                                         |\n" +
@@ -39,7 +39,6 @@ public class JProxy {
 	}
 	/**
 	 * 此方式专为router使用
-	 * @throws Exception
 	 */
 	public void start1(SocketListener listener) throws Exception {
         printWelcome();
@@ -49,8 +48,6 @@ public class JProxy {
 	}
 	/**
 	 * 启动JProxy
-	 * @param conf
-	 * @throws Exception
 	 */
 	public void start(String conf) throws Exception {
 		printWelcome();
@@ -62,6 +59,4 @@ public class JProxy {
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new ServiceRegistryManager(), 1000, 30000);
 	}
-	
-	
 }

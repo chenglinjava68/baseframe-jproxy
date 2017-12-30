@@ -10,37 +10,35 @@ import com.hty.baseframe.jproxy.registry.loader.ServiceConsumer;
 import com.hty.baseframe.jproxy.registry.loader.ServiceProvider;
 
 public class JProxyServiceRegistry implements ServiceRegistryClient {
-	
-	//private final Log logger = LogFactory.getLog(JProxyServiceRegistry.class);
-	
-	private static JProxyServiceRegistry registryClient;
-	
-	/**
-	 * 构造私有化
-	 */
-	private JProxyServiceRegistry() {
-	}
-	
-	public static synchronized JProxyServiceRegistry getInstance() {
-		if(null == registryClient) {
-			registryClient = new JProxyServiceRegistry();
-		}
-		return registryClient;
-	}
-	
-	
-	@Override
-	public boolean register(LocalService ls, ServiceProvider provider) {
-		ServiceRegistryService regServer = ServiceFactory.getProxyInstance(ServiceRegistryService.class, ls.getCenterId(), null);
-		return regServer.expose(provider);
-	}
 
-	@Override
-	public CandidateProvider getAvailableService(RemoteService rs, ServiceConsumer consumer) {
-		ServiceRegistryService regServer = ServiceFactory.getProxyInstance(ServiceRegistryService.class, rs.getCenterId(), null);
-		CandidateProvider provider = regServer.find(consumer);
-		return provider;
-	}
+    private static JProxyServiceRegistry registryClient;
 
-	
+    /**
+     * 构造私有化
+     */
+    private JProxyServiceRegistry() {
+    }
+
+    public static synchronized JProxyServiceRegistry getInstance() {
+        if (null == registryClient) {
+            registryClient = new JProxyServiceRegistry();
+        }
+        return registryClient;
+    }
+
+
+    @Override
+    public boolean register(LocalService ls, ServiceProvider provider) {
+        ServiceRegistryService regServer = ServiceFactory.getProxyInstance(ServiceRegistryService.class, ls.getCenterId(), null);
+        return regServer.expose(provider);
+    }
+
+    @Override
+    public CandidateProvider getAvailableService(RemoteService rs, ServiceConsumer consumer) {
+        ServiceRegistryService regServer = ServiceFactory.getProxyInstance(ServiceRegistryService.class, rs.getCenterId(), null);
+        CandidateProvider provider = regServer.find(consumer);
+        return provider;
+    }
+
+
 }

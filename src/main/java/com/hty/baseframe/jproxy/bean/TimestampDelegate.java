@@ -10,9 +10,11 @@ import com.dyuproject.protostuff.WireFormat.FieldType;
 import com.dyuproject.protostuff.runtime.Delegate;
 /**
  * 修正Protostuff序列化时间错误
- * @author Tisnyi
+ * @author Hetianyi 2017/12/30
+ * @version 1.0
  */
 public class TimestampDelegate implements Delegate<Timestamp> {
+
 	public FieldType getFieldType() {
         return FieldType.FIXED64;
     }

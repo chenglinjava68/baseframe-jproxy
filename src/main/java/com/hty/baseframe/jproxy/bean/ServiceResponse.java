@@ -3,7 +3,8 @@ package com.hty.baseframe.jproxy.bean;
 import java.io.Serializable;
 /**
  * 请求响应
- * @author Tisnyi
+ * @author Hetianyi 2017/12/30
+ * @version 1.0
  */
 public class ServiceResponse implements Serializable {
 

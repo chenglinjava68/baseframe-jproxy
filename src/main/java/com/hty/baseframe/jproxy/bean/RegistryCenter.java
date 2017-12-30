@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 /**
  * 注册中心Bean
- * @author Tisnyi
+ * @author Hetianyi 2017/12/30
+ * @version 1.0
  */
 public class RegistryCenter implements Serializable {
 

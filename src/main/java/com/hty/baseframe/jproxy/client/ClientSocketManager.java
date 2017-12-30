@@ -14,17 +14,20 @@ import com.hty.baseframe.jproxy.tunel.client.ClientTunnel;
 import com.hty.baseframe.jproxy.util.NetWorkInterfaceUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.*;
 
 /**
  * 客户端连接管理类，控制每个RemoteService的连接key信息的注册和获取，提供了统一的连接管理。
- * @author Tisnyi
+ * @author Hetianyi 2017/12/30
+ * @version 1.0
  */
 public class ClientSocketManager {
 	
-	private final static Log logger = LogFactory.getLog(ClientSocketManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(ClientSocketManager.class);
 	/** 单实例 */
 	private static ClientSocketManager clientSocketManager;
 
@@ -54,8 +57,6 @@ public class ClientSocketManager {
 
     /**
      * 产生新的连接
-     * @param service
-     * @return
      */
 	private String createTunnel(RemoteService service) throws Exception {
 	    //TODO 如果已经连接成功的服务出现永久性（或长期）离线状态，则会出现连接失败，那么客户端会不断尝试重连，应该重新从注册中心获取提供者

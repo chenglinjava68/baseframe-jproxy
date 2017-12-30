@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * 远程服务（本地调用远程主机提供的服务）。<br>
- * @author Tisnyi
+ * 远程服务（本地调用远程主机提供的服务）。
+ * @author Hetianyi 2017/12/30
  * @version 1.0
  */
 public class RemoteService {

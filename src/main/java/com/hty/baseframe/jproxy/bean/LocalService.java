@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 /**
- * 本地服务（本地对外提供的服务）。<br>
- * @author Tisnyi
+ * 本地服务（本地对外提供的服务）。
+ * @author Hetianyi 2017/12/30
  * @version 1.0
  */
 public class LocalService implements Serializable {

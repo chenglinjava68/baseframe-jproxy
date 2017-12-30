@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 /**
  * Service请求Bean
- * @author Tisnyi
+ * @author Hetianyi 2017/12/30
+ * @version 1.0
  */
 public class ServiceRequest implements Serializable {
 

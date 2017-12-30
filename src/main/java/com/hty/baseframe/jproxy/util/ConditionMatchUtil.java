@@ -9,27 +9,24 @@ import java.util.Map;
 public class ConditionMatchUtil {
     /**
      * 判断Service是否满足给定的条件
-     * @param requestConditions
-     * @param initialConditions
-     * @return
      */
     public static boolean isMatch(Map<String, String> requestConditions,
-                           Map<String, String> initialConditions) {
-        if(null == requestConditions || requestConditions.isEmpty()) {
+                                  Map<String, String> initialConditions) {
+        if (null == requestConditions || requestConditions.isEmpty()) {
             return true;
         }
-        if(null == initialConditions || initialConditions.isEmpty()) {
+        if (null == initialConditions || initialConditions.isEmpty()) {
             return false;
         }
         boolean matchAll = true;
-        for(Iterator<String> it = requestConditions.keySet().iterator(); it.hasNext();) {
+        for (Iterator<String> it = requestConditions.keySet().iterator(); it.hasNext(); ) {
             String key = it.next();
             String reqValue = requestConditions.get(key);
             String initValue = initialConditions.get(key);
-            if(StringUtil.isEmpty(reqValue) && StringUtil.isEmpty(initValue)) {
+            if (StringUtil.isEmpty(reqValue) && StringUtil.isEmpty(initValue)) {
                 continue;
             }
-            if(!reqValue.equalsIgnoreCase(initValue)) {
+            if (!reqValue.equalsIgnoreCase(initValue)) {
                 matchAll = false;
                 break;
             }
@@ -43,37 +40,36 @@ public class ConditionMatchUtil {
      * 1:1包含2<br>
      * 2:2包含 1<br>
      * -1:互不包含
+     *
      * @param cds1 map1
      * @param cds2 map2
      * @return
      */
     public static int mapCompare(Map<String, String> cds1,
-                          Map<String, String> cds2) {
-        if((null == cds1 || cds1.isEmpty()) &&
+                                 Map<String, String> cds2) {
+        if ((null == cds1 || cds1.isEmpty()) &&
                 (null == cds2 || cds2.isEmpty()))
             return 0;
-        if(null == cds1 && null != cds2) {
+        if (null == cds1 && null != cds2) {
             return 2;
         }
-        if(null == cds2 && null != cds1) {
+        if (null == cds2 && null != cds1) {
             return 1;
         }
-        if(cds1.size() > cds2.size()) {
-            if(isMatch(cds2, cds1)) {
+        if (cds1.size() > cds2.size()) {
+            if (isMatch(cds2, cds1)) {
                 return 1;
             } else {
                 return -1;
             }
-        }
-        else if(cds2.size() > cds1.size()) {
-            if(isMatch(cds1, cds2)) {
+        } else if (cds2.size() > cds1.size()) {
+            if (isMatch(cds1, cds2)) {
                 return 2;
             } else {
                 return -1;
             }
-        }
-        else {
-            if(isMatch(cds1, cds2)) {
+        } else {
+            if (isMatch(cds1, cds2)) {
                 return 0;
             } else {
                 return -1;

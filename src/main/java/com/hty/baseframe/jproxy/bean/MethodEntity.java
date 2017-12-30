@@ -3,7 +3,8 @@ package com.hty.baseframe.jproxy.bean;
 import java.io.Serializable;
 /**
  * 调用服务方法的载体
- * @author Tisnyi
+ * @author Hetianyi 2017/12/30
+ * @version 1.0
  */
 public class MethodEntity implements Serializable {
 
@@ -11,7 +12,7 @@ public class MethodEntity implements Serializable {
 	/**
 	 * 调用方法所在类的名称:class.getName() 
 	 */
-	private Class<?> obejctClass;
+	private Class<?> objectClass;
 	/**
 	 * 调用的方法名
 	 */
@@ -26,11 +27,11 @@ public class MethodEntity implements Serializable {
 	private Class<?>[] argsTypes;
 	
 	
-	public Class<?> getObejctClass() {
-		return obejctClass;
+	public Class<?> getObjectClass() {
+		return objectClass;
 	}
-	public void setObejctClass(Class<?> obejctClass) {
-		this.obejctClass = obejctClass;
+	public void setObjectClass(Class<?> objectClass) {
+		this.objectClass = objectClass;
 	}
 	public String getMethodName() {
 		return methodName;
